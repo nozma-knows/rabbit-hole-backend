@@ -1,9 +1,20 @@
 services:
-  - name: rabbit-hole
-    startCommand: yarn start
-    env:
-      DATABASE_URL: postgres://rabbit_hole_prod_user:EGA0RHoU8o1iD0fJmU9lvFUiBDg14rlM@dpg-ch9ctuhmbg51autu2570-a.ohio-postgres.render.com/rabbit_hole_prod
-
-    run:
-      name: Run Prisma Migrations
-      command: npx prisma migrate deploy
+  - type: web
+  env: node
+  name: rabbit-hole
+  repo: https://github.com/nozma-knows/rabbit-hole-backend
+  buildCommand: yarn && yarn build
+  startCommand: yarn start
+  healthCheckPath: /
+  envVars: 
+    - key: DATABASE_URL
+      fromDatabase:
+        name: rabbit-hole-prod
+        property: connectionString
+    POSTGRES_USER: admin
+    POSTGRES_PASSWORD: password
+databases:
+  - name: rabbit-hole-prod
+    databaseName: rabbit-hole-prod
+    user: rabbit_hole_prod_user
+  
