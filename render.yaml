@@ -3,6 +3,7 @@ services:
     startCommand: yarn start
     env:
       DATABASE_URL: postgres://rabbit_hole_prod_user:EGA0RHoU8o1iD0fJmU9lvFUiBDg14rlM@dpg-ch9ctuhmbg51autu2570-a.ohio-postgres.render.com/rabbit_hole_prod
+
     run:
       name: Run Prisma Migrations
       command: npx prisma migrate deploy
