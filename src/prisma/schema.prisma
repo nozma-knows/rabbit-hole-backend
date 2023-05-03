@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PrereqTopic {
+  id          String       @id @default(uuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  prereqId    String
+  prereq      CoursePrereq @relation(fields: [prereqId], references: [id])
+  title       String
+  description String
+}
+
+model CoursePrereq {
+  id          String        @id @default(uuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  courseId    String
+  course      Course        @relation(fields: [courseId], references: [id])
+  title       String
+  description String
+  topics      PrereqTopic[]
+}
+
+model UnitLesson {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  unitId    String
+  unit      CourseUnit @relation(fields: [unitId], references: [id])
+  title     String
+  topics    String
+  content   String
+}
+
+model UnitExercise {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  unitId    String
+  unit      CourseUnit @relation(fields: [unitId], references: [id])
+  task      String
+}
+
+model QuizQuestion {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quizId    String
+  quiz      UnitQuiz @relation(fields: [quizId], references: [id])
+  question  String
+  choices   String[]
+  answer    String
+}
+
+model UnitQuiz {
+  id        String         @id @default(uuid())
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  unitId    String
+  unit      CourseUnit     @relation(fields: [unitId], references: [id])
+  questions QuizQuestion[]
+}
+
+model CourseUnit {
+  id          String         @id @default(uuid())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  courseId    String
+  course      Course         @relation(fields: [courseId], references: [id])
+  title       String
+  description String
+  lessons     UnitLesson[]
+  exercises   UnitExercise[]
+  quizzes     UnitQuiz[]
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model CourseProgress {
+  id                 String     @id @default(uuid())
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  enrollmentId       String     @unique
+  enrollment         Enrollment @relation(fields: [enrollmentId], references: [id])
+  lessonsCompleted   String[]
+  exercisesCompleted String[]
+  quizzesCompleted   String[]
+  status             Status
+  currentLessonId    String
+}
+
+model Enrollment {
+  id        String          @id @default(uuid())
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  userId    String
+  courseId  String
+  course    Course          @relation(fields: [courseId], references: [id])
+  progress  CourseProgress?
+}
+
+model Course {
+  id          String         @id @default(uuid())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  authorId    String
+  title       String
+  description String
+  prereqs     CoursePrereq[]
+  units       CourseUnit[]
+  enrollments Enrollment[]
+  public      Boolean        @default(false)
+}

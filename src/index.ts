@@ -1,43 +1,46 @@
 import { createServer } from "http";
 import express from "express";
-import { ApolloServer, gql } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-express";
+import { readFileSync } from "fs";
+import { resolvers } from "./graph/resolvers";
+import { expressjwt } from "express-jwt";
+import { PrismaClient } from "@prisma/client";
 
-// 1
+const typeDefs = readFileSync("./src/graph/schema.graphql", {
+  encoding: "utf-8",
+});
+
 const startServer = async () => {
-  // 2
   const app = express();
+  app.use(
+    expressjwt({
+      secret: `${process.env.JWT_PRIVATE_KEY}`,
+      algorithms: ["HS256"],
+      credentialsRequired: false,
+    })
+  );
   const httpServer = createServer(app);
 
-  // 3
-  const typeDefs = gql`
-    type Query {
-      hello: String
-    }
-  `;
+  const prisma = new PrismaClient();
 
-  // 4
-  const resolvers = {
-    Query: {
-      hello: () => "Hello world!",
-    },
-  };
-
-  // 5
   const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
+    context: async ({ req, res }) => ({
+      prisma, // prisma client
+      userId: req.headers.userId, // user id from token
+      expiry: req.headers.expiry, // expiry from token
+      token: req.headers.authorization?.split("Bearer ")[1], // token
+    }),
   });
 
-  // 6
   await apolloServer.start();
 
-  // 7
   apolloServer.applyMiddleware({
     app,
     path: "/api",
   });
 
-  // 8
   httpServer.listen({ port: process.env.PORT || 4000 }, () =>
     console.log(`Server listening on localhost:4000${apolloServer.graphqlPath}`)
   );
