@@ -165,7 +165,6 @@ export const courseMutationResolvers: CourseResolvers = {
     args: { input: CreateCourseInput },
     contextValue: Context
   ) => {
-    console.log("HERE");
     // Grab prisma client
     const { prisma } = contextValue;
 
@@ -181,8 +180,6 @@ export const courseMutationResolvers: CourseResolvers = {
     if (!authorId || !title || !description) {
       throw new Error("Missing required fields.");
     }
-
-    console.log("RIGHT BEFORE COURSE CREATION");
 
     const course = await prisma.course.create({
       data: {
@@ -206,8 +203,6 @@ export const courseMutationResolvers: CourseResolvers = {
     if (!course) {
       throw new Error("Failed to create course.");
     }
-
-    console.log("course: ", course);
 
     return course;
   },
