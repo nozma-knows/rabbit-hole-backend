@@ -531,7 +531,9 @@ exports.courseMutationResolvers = {
         if (!title || !description || !lessons) {
             throw new Error("Unit is missing required fields.");
         }
-        const topics = lessons.map((lesson) => lesson.topics).join(" ");
+        const topics = lessons
+            .map((lesson) => lesson.topics)
+            .join(" ");
         // Create model
         const model = new OpenAI({
             openAIApiKey: process.env.OPENAI_API_KEY,
@@ -658,7 +660,9 @@ exports.courseMutationResolvers = {
             throw new Error("Unit is missing required fields.");
         }
         // Grab topics
-        const topics = lessons.map((lesson) => lesson.topics).join(" ");
+        const topics = lessons
+            .map((lesson) => lesson.topics)
+            .join(" ");
         // Grab topics error handling
         if (!topics) {
             throw new Error("Failed to find topics.");

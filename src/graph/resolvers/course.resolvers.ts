@@ -291,52 +291,63 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Failed to create model");
     }
 
-    // Create parser
-    const parser = StructuredOutputParser.fromZodSchema(
-      z
-        .array(
-          z.object({
-            title: z.string().describe("Title of a course prerequisite"),
-            description: z
-              .string()
-              .describe("A two sentence description of a course prerequisite"),
-            topics: z
-              .array(
-                z.object({
-                  title: z
-                    .string()
-                    .describe("Title of a course prerequisite topic"),
-                  description: z
-                    .string()
-                    .describe(
-                      "A two sentence description of a course prerequisite topic"
-                    ),
-                })
-              )
-              .describe("Topics of a course prerequisite"),
-          })
-        )
-        .describe("Prerequisites of a course")
-    );
+    // // Create parser
+    // const parser = StructuredOutputParser.fromZodSchema(
+    //   z
+    //     .array(
+    //       z.object({
+    //         title: z.string().describe("Title for the prerequisite"),
+    //         description: z
+    //           .string()
+    //           .describe("Two sentence description for the course prerequisite"),
+    //         topics: z
+    //           .array(
+    //             z.object({
+    //               title: z
+    //                 .string()
+    //                 .describe("Title for the prerequisite topic"),
+    //               description: z
+    //                 .string()
+    //                 .describe(
+    //                   "Two sentence description for the prerequisite topic"
+    //                 ),
+    //             })
+    //           )
+    //           .describe("List of prerequisite topics"),
+    //       })
+    //     )
+    //     .describe("List of prerequisites")
+    // );
 
-    // Create parser error handling
-    if (!parser) {
-      throw new Error("Failed to create parser");
-    }
+    // // Create parser error handling
+    // if (!parser) {
+    //   throw new Error("Failed to create parser");
+    // }
 
-    // Create formatInstructions
-    const formatInstructions = parser.getFormatInstructions();
+    // // Create formatInstructions
+    // const formatInstructions = parser.getFormatInstructions();
 
-    // Create formatInstructions error handling
-    if (!formatInstructions) {
-      throw new Error("Failed to create formatInstructions");
-    }
+    // // Create formatInstructions error handling
+    // if (!formatInstructions) {
+    //   throw new Error("Failed to create formatInstructions");
+    // }
+
+    // console.log("format instructions: ", formatInstructions);
 
     // Create promptTemplate
+    // const promptTemplate = new PromptTemplate({
+    //   template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". {format_instructions}. Limit the number of prerequisites to the top 3.`,
+    //   inputVariables: ["title", "description"],
+    //   partialVariables: { format_instructions: formatInstructions },
+    // });
+
+    // const promptTemplate = new PromptTemplate({
+    //   template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". {format_instructions}. Limit the number of prerequisites to the top 3.`,
+    //   inputVariables: ["title", "description"],
+    // });
     const promptTemplate = new PromptTemplate({
-      template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". Output the response with the following format: {format_instructions}. Limit the number of prerequisites to the top 3.`,
+      template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". Limit the number of prerequisites to the top 3. Output should be in JSON format. Each prerequisite should have a title, description, and list of topics. Each topic should have a title and description.`,
       inputVariables: ["title", "description"],
-      partialVariables: { format_instructions: formatInstructions },
     });
 
     // Create promptTemplate error handling
@@ -360,13 +371,19 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Failed to call openai");
     }
 
+    const parsedResult = JSON.parse(result).prerequisites;
+
     // Parse result
-    const parsedResult = await parser.parse(result);
+    // const parsedResult = await parser.parse(result);
+    // const parsedResult: any = [];
 
     // Parse result error handling
-    if (!parsedResult) {
-      throw new Error("Failed to parse result");
-    }
+    // if (!parsedResult) {
+    //   console.log("parsedResult is null");
+    //   throw new Error("Failed to parse result");
+    // }
+
+    // console.log("parsedResult: ", parsedResult);
 
     // Create course prereqs
     const prereqs: any[] = [];
@@ -489,54 +506,60 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Failed to create model");
     }
 
-    // Create parser
-    const parser = StructuredOutputParser.fromZodSchema(
-      z
-        .array(
-          z.object({
-            title: z.string().describe("Title of a course unit"),
-            description: z.string().describe("Description of a course unit"),
-            lessons: z
-              .array(
-                z
-                  .object({
-                    title: z
-                      .string()
-                      .describe("Title of a course unit's lesson"),
-                    topics: z
-                      .array(
-                        z
-                          .string()
-                          .describe("Topic covered in a course unit's lesson")
-                      )
-                      .describe("Topics covered in a course unit's lesson"),
-                  })
-                  .describe("Lesson covered in a course unit")
-              )
-              .describe("Lessons covered in a course unit"),
-          })
-        )
-        .describe("Units of a course")
-    );
+    // // Create parser
+    // const parser = StructuredOutputParser.fromZodSchema(
+    //   z
+    //     .array(
+    //       z.object({
+    //         title: z.string().describe("Title of a course unit"),
+    //         description: z.string().describe("Description of a course unit"),
+    //         lessons: z
+    //           .array(
+    //             z
+    //               .object({
+    //                 title: z
+    //                   .string()
+    //                   .describe("Title of a course unit's lesson"),
+    //                 topics: z
+    //                   .array(
+    //                     z
+    //                       .string()
+    //                       .describe("Topic covered in a course unit's lesson")
+    //                   )
+    //                   .describe("Topics covered in a course unit's lesson"),
+    //               })
+    //               .describe("Lesson covered in a course unit")
+    //           )
+    //           .describe("Lessons covered in a course unit"),
+    //       })
+    //     )
+    //     .describe("Units of a course")
+    // );
 
-    // Create parser error handling
-    if (!parser) {
-      throw new Error("Failed to create parser");
-    }
+    // // Create parser error handling
+    // if (!parser) {
+    //   throw new Error("Failed to create parser");
+    // }
 
-    // Create formatInstructions
-    const formatInstructions = parser.getFormatInstructions();
+    // // Create formatInstructions
+    // const formatInstructions = parser.getFormatInstructions();
 
-    // Create formatInstructions error handling
-    if (!formatInstructions) {
-      throw new Error("Failed to create formatInstructions");
-    }
+    // // Create formatInstructions error handling
+    // if (!formatInstructions) {
+    //   throw new Error("Failed to create formatInstructions");
+    // }
+
+    // // Create promptTemplate
+    // const promptTemplate = new PromptTemplate({
+    //   template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Output the response with the following format: {format_instructions}. Each unit should contain a minimum of 3 lessons.`,
+    //   inputVariables: ["title", "description"],
+    //   partialVariables: { format_instructions: formatInstructions },
+    // });
 
     // Create promptTemplate
     const promptTemplate = new PromptTemplate({
-      template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Output the response with the following format: {format_instructions}. Each unit should contain a minimum of 3 lessons.`,
+      template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Each unit should contain a minimum of 3 lessons. Output should be an object with a key of units and value that is an array of units. Output should be in JSON format. Each unit should include a title, description and list of lessons. Each lesson should include a title and a list of topics. Each topic should be a string.`,
       inputVariables: ["title", "description"],
-      partialVariables: { format_instructions: formatInstructions },
     });
 
     // Create promptTemplate error handling
@@ -559,9 +582,9 @@ export const courseMutationResolvers: CourseResolvers = {
     if (!result) {
       throw new Error("Failed to call openai");
     }
-
+    const parsedResult = JSON.parse(result).units;
     // Parse result
-    const parsedResult = await parser.parse(result);
+    // const parsedResult = await parser.parse(result);
 
     // Parse result error handling
     if (!parsedResult) {
@@ -682,7 +705,9 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Unit is missing required fields.");
     }
 
-    const topics = lessons.map((lesson) => lesson.topics).join(" ");
+    const topics = lessons
+      .map((lesson: { topics: string }) => lesson.topics)
+      .join(" ");
 
     // Create model
     const model = new OpenAI({
@@ -844,7 +869,9 @@ export const courseMutationResolvers: CourseResolvers = {
     }
 
     // Grab topics
-    const topics = lessons.map((lesson) => lesson.topics).join(" ");
+    const topics = lessons
+      .map((lesson: { topics: string }) => lesson.topics)
+      .join(" ");
 
     // Grab topics error handling
     if (!topics) {
@@ -994,7 +1021,9 @@ export const courseMutationResolvers: CourseResolvers = {
       },
     });
 
-    return updatedUnit.quizzes.find((quiz) => quiz.id === quizId); // Return course
+    return updatedUnit.quizzes.find(
+      (quiz: { id: string }) => quiz.id === quizId
+    ); // Return course
   },
 
   // Generate lesson mutation resolver
