@@ -15,6 +15,7 @@ import {
 import { z } from "zod";
 const { OpenAI, PromptTemplate } = require("langchain");
 const { StructuredOutputParser } = require("langchain/output_parsers");
+const crypto = require("crypto");
 
 interface Context {
   prisma: PrismaClient;
