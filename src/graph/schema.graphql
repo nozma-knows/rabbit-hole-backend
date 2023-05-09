@@ -1,3 +1,19 @@
+type UserDetails {
+  id: ID!
+  createdAt: String
+  updatedAt: String
+  userId: String
+  firstName: String
+  lastName: String
+  nickname: String
+  dob: String
+  pronouns: [String]
+  educationLevel: String
+  occupation: String
+  interests: String
+  learningStyle: String
+}
+
 type PrereqTopic {
   id: ID!
   createdAt: String!
@@ -129,11 +145,24 @@ input GenerateLessonInput {
   pastTopics: String!
 }
 
+input UpdateUserDetailsInput {
+  firstName: String
+  lastName: String
+  nickname: String
+  dob: String
+  pronouns: [String]
+  educationLevel: String
+  occupation: String
+  interests: String
+  learningStyle: String
+}
+
 type Query {
   course(id: String!): Course
   courses(authorId: String!): [Course]!
   enrolledIn(userId: String!): [CourseEnrollment]!
   allCourses: [Course]
+  userDetails(userId: String!): UserDetails
 }
 
 type Mutation {
@@ -145,4 +174,9 @@ type Mutation {
   generateQuiz(id: String!): UnitQuiz!
   generateLesson(input: GenerateLessonInput!): UnitLesson!
   toggleCourseEnrollment(userId: String!, courseId: String!): CourseEnrollment!
+  createUserDetails(userId: String!): UserDetails!
+  updateUserDetails(
+    userId: String!
+    input: UpdateUserDetailsInput
+  ): UserDetails!
 }

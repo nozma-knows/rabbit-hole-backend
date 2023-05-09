@@ -125,3 +125,19 @@ model Course {
   enrollments Enrollment[]
   public      Boolean        @default(false)
 }
+
+model UserDetails {
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  userId         String    @unique
+  firstName      String?
+  lastName       String?
+  nickname       String?
+  dob            DateTime?
+  pronouns       String[]
+  educationLevel String?
+  occupation     String?
+  interests      String[]
+  learningStyle  String?
+}
