@@ -40,12 +40,12 @@ export const userQueryResolvers: CourseResolvers = {
       throw new Error("Missing required fields");
     }
 
-    // Find course
+    // Find user details
     const userDetails = await prisma.userDetails.findUnique({
       where: { userId },
     });
 
-    // Find course error handling
+    // Find user details error handling
     if (!userDetails) {
       throw new Error("Failed to find course");
     }
@@ -74,7 +74,18 @@ export const userMutationResolvers: CourseResolvers = {
     if (!userId) {
       throw new Error("Missing required fields.");
     }
-    const userDetails = await prisma.userDetails.create({
+
+    // Find user details
+    let userDetails = await prisma.userDetails.findUnique({
+      where: { userId },
+    });
+
+    // Find user details error handling
+    if (userDetails) {
+      return userDetails;
+    }
+
+    userDetails = await prisma.userDetails.create({
       data: {
         id: crypto.randomUUID(),
         userId,
