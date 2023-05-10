@@ -1,4 +1,7 @@
-import { CourseEnrollment } from "./../../__generated__/resolvers-types";
+import {
+  CourseEnrollment,
+  UpdateCompletedLessonsInput,
+} from "./../../__generated__/resolvers-types";
 import { PrismaClient } from "@prisma/client";
 import {
   CoursePrereq,
@@ -1237,6 +1240,63 @@ export const courseMutationResolvers: CourseResolvers = {
       },
       data: {
         currentLessonId: lessonId,
+      },
+    });
+
+    // Update course progress error handling
+    if (!progress) {
+      throw new Error("Failed to update course progress");
+    }
+
+    return progress;
+  },
+
+  // Update Completed Lessons
+  updateCompletedLessons: async (
+    _parent: any,
+    args: { input: UpdateCompletedLessonsInput },
+    contextValue: Context
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { userId, courseId, lessonId } = args.input;
+
+    // Grab args error handling
+    if (!userId || !courseId || !lessonId) {
+      throw new Error("Missing required fields.");
+    }
+
+    const enrollment = await prisma.enrollment.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+      include: {
+        progress: true,
+      },
+    });
+
+    // Create enrollment error handling
+    if (!enrollment) {
+      throw new Error("Failed to find enrollment");
+    }
+
+    // Update course progress
+    const progress = await prisma.courseProgress.update({
+      where: {
+        enrollmentId: enrollment.id,
+      },
+      data: {
+        lessonsCompleted: [...enrollment.progress!.lessonsCompleted, lessonId],
       },
     });
 
