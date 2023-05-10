@@ -1290,15 +1290,33 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Failed to find enrollment");
     }
 
-    // Update course progress
-    const progress = await prisma.courseProgress.update({
-      where: {
-        enrollmentId: enrollment.id,
-      },
-      data: {
-        lessonsCompleted: [...enrollment.progress!.lessonsCompleted, lessonId],
-      },
-    });
+    let progress = enrollment.progress;
+
+    if (enrollment.progress!.lessonsCompleted.find((id) => id === lessonId)) {
+      progress = await prisma.courseProgress.update({
+        where: {
+          enrollmentId: enrollment.id,
+        },
+        data: {
+          lessonsCompleted: progress!.lessonsCompleted.filter(
+            (id) => id !== lessonId
+          ),
+        },
+      });
+    } else {
+      // Update course progress
+      progress = await prisma.courseProgress.update({
+        where: {
+          enrollmentId: enrollment.id,
+        },
+        data: {
+          lessonsCompleted: [
+            ...enrollment.progress!.lessonsCompleted,
+            lessonId,
+          ],
+        },
+      });
+    }
 
     // Update course progress error handling
     if (!progress) {
