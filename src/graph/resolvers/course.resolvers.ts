@@ -106,6 +106,67 @@ export const courseQueryResolvers: CourseResolvers = {
     return courses;
   },
 
+  // Enrollment query resolver
+  enrollment: async (
+    _parent: any,
+    args: { userId: string; courseId: string },
+    contextValue: any
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { userId, courseId } = args;
+
+    // Grab args error handling
+    if (!userId || !courseId) {
+      throw new Error("Missing required fields");
+    }
+
+    // Find enrollment
+    const enrollment = await prisma.enrollment.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+      include: {
+        course: {
+          include: {
+            prereqs: {
+              include: {
+                topics: true,
+              },
+            },
+            units: {
+              include: {
+                lessons: true,
+                quizzes: {
+                  include: {
+                    questions: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        progress: true,
+      },
+    });
+
+    // Find courses error handling
+    if (!enrollment) {
+      throw new Error("Failed to find courses");
+    }
+
+    return enrollment;
+  },
+
   // EnrolledIn query resolver
   enrolledIn: async (
     _parent: any,
@@ -132,6 +193,7 @@ export const courseQueryResolvers: CourseResolvers = {
       where: { userId },
       include: {
         course: true,
+        progress: true,
       },
     });
 
@@ -1167,8 +1229,6 @@ export const courseMutationResolvers: CourseResolvers = {
     if (!enrollment) {
       throw new Error("Failed to find enrollment");
     }
-
-    console.log("enrollment: ", enrollment);
 
     // Update course progress
     const progress = await prisma.courseProgress.update({

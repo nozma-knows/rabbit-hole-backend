@@ -105,7 +105,7 @@ type CourseProgress {
   exercisesCompleted: [String]!
   quizzesCompleted: [String]!
   status: Status!
-  currentLessonId: String!
+  currentLessonId: String
 }
 
 type CourseEnrollment {
@@ -167,6 +167,7 @@ input UpdateCurrentLessonIdInput {
 type Query {
   course(id: String!): Course
   courses(authorId: String!): [Course]!
+  enrollment(userId: String!, courseId: String!): CourseEnrollment!
   enrolledIn(userId: String!): [CourseEnrollment]!
   allCourses: [Course]
   userDetails(userId: String!): UserDetails

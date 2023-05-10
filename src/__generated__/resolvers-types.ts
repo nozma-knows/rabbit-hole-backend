@@ -55,7 +55,7 @@ export type CoursePrereq = {
 export type CourseProgress = {
   __typename?: 'CourseProgress';
   createdAt: Scalars['String'];
-  currentLessonId: Scalars['String'];
+  currentLessonId?: Maybe<Scalars['String']>;
   enrollment: CourseEnrollment;
   enrollmentId: Scalars['String'];
   exercisesCompleted: Array<Maybe<Scalars['String']>>;
@@ -184,6 +184,7 @@ export type Query = {
   course?: Maybe<Course>;
   courses: Array<Maybe<Course>>;
   enrolledIn: Array<Maybe<CourseEnrollment>>;
+  enrollment: CourseEnrollment;
   userDetails?: Maybe<UserDetails>;
 };
 
@@ -199,6 +200,12 @@ export type QueryCoursesArgs = {
 
 
 export type QueryEnrolledInArgs = {
+  userId: Scalars['String'];
+};
+
+
+export type QueryEnrollmentArgs = {
+  courseId: Scalars['String'];
   userId: Scalars['String'];
 };
 
@@ -451,7 +458,7 @@ export type CoursePrereqResolvers<ContextType = Context, ParentType extends Reso
 
 export type CourseProgressResolvers<ContextType = Context, ParentType extends ResolversParentTypes['CourseProgress'] = ResolversParentTypes['CourseProgress']> = ResolversObject<{
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  currentLessonId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  currentLessonId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   enrollment?: Resolver<ResolversTypes['CourseEnrollment'], ParentType, ContextType>;
   enrollmentId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   exercisesCompleted?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -507,6 +514,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   course?: Resolver<Maybe<ResolversTypes['Course']>, ParentType, ContextType, RequireFields<QueryCourseArgs, 'id'>>;
   courses?: Resolver<Array<Maybe<ResolversTypes['Course']>>, ParentType, ContextType, RequireFields<QueryCoursesArgs, 'authorId'>>;
   enrolledIn?: Resolver<Array<Maybe<ResolversTypes['CourseEnrollment']>>, ParentType, ContextType, RequireFields<QueryEnrolledInArgs, 'userId'>>;
+  enrollment?: Resolver<ResolversTypes['CourseEnrollment'], ParentType, ContextType, RequireFields<QueryEnrollmentArgs, 'courseId' | 'userId'>>;
   userDetails?: Resolver<Maybe<ResolversTypes['UserDetails']>, ParentType, ContextType, RequireFields<QueryUserDetailsArgs, 'userId'>>;
 }>;
 
