@@ -255,7 +255,7 @@ export type UpdateUserDetailsInput = {
   dob?: InputMaybe<Scalars['String']>;
   educationLevel?: InputMaybe<Scalars['String']>;
   firstName?: InputMaybe<Scalars['String']>;
-  interests?: InputMaybe<Scalars['String']>;
+  interests?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   lastName?: InputMaybe<Scalars['String']>;
   learningStyle?: InputMaybe<Scalars['String']>;
   nickname?: InputMaybe<Scalars['String']>;
@@ -270,12 +270,13 @@ export type UserDetails = {
   educationLevel?: Maybe<Scalars['String']>;
   firstName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
-  interests?: Maybe<Scalars['String']>;
+  interests?: Maybe<Array<Maybe<Scalars['String']>>>;
   lastName?: Maybe<Scalars['String']>;
   learningStyle?: Maybe<Scalars['String']>;
   nickname?: Maybe<Scalars['String']>;
   occupation?: Maybe<Scalars['String']>;
   pronouns?: Maybe<Array<Maybe<Scalars['String']>>>;
+  seenOnboarding?: Maybe<Scalars['Boolean']>;
   updatedAt?: Maybe<Scalars['String']>;
   userId?: Maybe<Scalars['String']>;
 };
@@ -544,12 +545,13 @@ export type UserDetailsResolvers<ContextType = Context, ParentType extends Resol
   educationLevel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  interests?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  interests?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   learningStyle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   nickname?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   occupation?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   pronouns?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  seenOnboarding?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   userId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

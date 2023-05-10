@@ -10,8 +10,9 @@ type UserDetails {
   pronouns: [String]
   educationLevel: String
   occupation: String
-  interests: String
+  interests: [String]
   learningStyle: String
+  seenOnboarding: Boolean
 }
 
 type PrereqTopic {
@@ -153,7 +154,7 @@ input UpdateUserDetailsInput {
   pronouns: [String]
   educationLevel: String
   occupation: String
-  interests: String
+  interests: [String]
   learningStyle: String
 }
 

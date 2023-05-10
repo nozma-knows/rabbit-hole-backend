@@ -104,7 +104,7 @@ export const courseQueryResolvers: CourseResolvers = {
     return courses;
   },
 
-  // Courses query resolver
+  // EnrolledIn query resolver
   enrolledIn: async (
     _parent: any,
     args: { userId: string },
@@ -128,6 +128,9 @@ export const courseQueryResolvers: CourseResolvers = {
     // Find courses
     const enrollments = await prisma.enrollment.findMany({
       where: { userId },
+      include: {
+        course: true,
+      },
     });
 
     // Find courses error handling
@@ -193,6 +196,15 @@ export const courseMutationResolvers: CourseResolvers = {
             {
               id: crypto.randomUUID(),
               userId: authorId,
+              progress: {
+                create: {
+                  id: crypto.randomUUID(),
+                  lessonsCompleted: [],
+                  exercisesCompleted: [],
+                  quizzesCompleted: [],
+                  status: Status.Pending,
+                },
+              },
             },
           ],
         },

@@ -100,7 +100,7 @@ model CourseProgress {
   exercisesCompleted String[]
   quizzesCompleted   String[]
   status             Status
-  currentLessonId    String
+  currentLessonId    String?
 }
 
 model Enrollment {
@@ -140,4 +140,5 @@ model UserDetails {
   occupation     String?
   interests      String[]
   learningStyle  String?
+  seenOnboarding Boolean   @default(false)
 }

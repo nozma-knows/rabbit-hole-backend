@@ -89,6 +89,7 @@ export const userMutationResolvers: CourseResolvers = {
       data: {
         id: crypto.randomUUID(),
         userId,
+        seenOnboarding: true,
       },
     });
 
@@ -136,15 +137,15 @@ export const userMutationResolvers: CourseResolvers = {
       },
       data: {
         userId,
-        firstName: firstName || null,
-        lastName: lastName || null,
-        nickname: nickname || null,
-        dob: dob || null,
-        pronouns: pronouns as string[],
-        educationLevel: educationLevel || null,
-        occupation: occupation || null,
-        interests: pronouns as string[],
-        learningStyle: learningStyle || null,
+        firstName: firstName,
+        lastName: lastName,
+        nickname: nickname,
+        dob: dob,
+        pronouns: pronouns ? (pronouns as string[]) : undefined,
+        educationLevel: educationLevel,
+        occupation: occupation,
+        interests: interests ? (interests as string[]) : undefined,
+        learningStyle: learningStyle,
       },
     });
 
