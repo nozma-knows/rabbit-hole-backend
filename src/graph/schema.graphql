@@ -158,6 +158,12 @@ input UpdateUserDetailsInput {
   learningStyle: String
 }
 
+input UpdateCurrentLessonIdInput {
+  userId: String!
+  courseId: String!
+  lessonId: String!
+}
+
 type Query {
   course(id: String!): Course
   courses(authorId: String!): [Course]!
@@ -180,4 +186,5 @@ type Mutation {
     userId: String!
     input: UpdateUserDetailsInput
   ): UserDetails!
+  updateCurrentLessonId(input: UpdateCurrentLessonIdInput): CourseProgress!
 }

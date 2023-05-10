@@ -111,6 +111,8 @@ model Enrollment {
   courseId  String
   course    Course          @relation(fields: [courseId], references: [id])
   progress  CourseProgress?
+
+  @@unique([userId, courseId])
 }
 
 model Course {

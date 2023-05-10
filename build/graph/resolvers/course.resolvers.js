@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.courseMutationResolvers = exports.courseQueryResolvers = void 0;
+const resolvers_types_1 = require("../../__generated__/resolvers-types");
 const zod_1 = require("zod");
 const { OpenAI, PromptTemplate } = require("langchain");
 const { StructuredOutputParser } = require("langchain/output_parsers");
@@ -79,7 +80,7 @@ exports.courseQueryResolvers = {
         }
         return courses;
     }),
-    // Courses query resolver
+    // EnrolledIn query resolver
     enrolledIn: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
         // Grab prisma client
         const { prisma } = contextValue;
@@ -95,6 +96,9 @@ exports.courseQueryResolvers = {
         // Find courses
         const enrollments = yield prisma.enrollment.findMany({
             where: { userId },
+            include: {
+                course: true,
+            },
         });
         // Find courses error handling
         if (!enrollments) {
@@ -144,6 +148,15 @@ exports.courseMutationResolvers = {
                         {
                             id: crypto.randomUUID(),
                             userId: authorId,
+                            progress: {
+                                create: {
+                                    id: crypto.randomUUID(),
+                                    lessonsCompleted: [],
+                                    exercisesCompleted: [],
+                                    quizzesCompleted: [],
+                                    status: resolvers_types_1.Status.Pending,
+                                },
+                            },
                         },
                     ],
                 },

@@ -106,6 +106,7 @@ export type Mutation = {
   generateQuiz: UnitQuiz;
   generateUnits: Course;
   toggleCourseEnrollment: CourseEnrollment;
+  updateCurrentLessonId: CourseProgress;
   updateUserDetails: UserDetails;
 };
 
@@ -153,6 +154,11 @@ export type MutationGenerateUnitsArgs = {
 export type MutationToggleCourseEnrollmentArgs = {
   courseId: Scalars['String'];
   userId: Scalars['String'];
+};
+
+
+export type MutationUpdateCurrentLessonIdArgs = {
+  input?: InputMaybe<UpdateCurrentLessonIdInput>;
 };
 
 
@@ -249,6 +255,12 @@ export type UnitQuiz = {
   unit: CourseUnit;
   unitId: Scalars['String'];
   updatedAt: Scalars['String'];
+};
+
+export type UpdateCurrentLessonIdInput = {
+  courseId: Scalars['String'];
+  lessonId: Scalars['String'];
+  userId: Scalars['String'];
 };
 
 export type UpdateUserDetailsInput = {
@@ -371,6 +383,7 @@ export type ResolversTypes = ResolversObject<{
   UnitExercise: ResolverTypeWrapper<UnitExercise>;
   UnitLesson: ResolverTypeWrapper<UnitLesson>;
   UnitQuiz: ResolverTypeWrapper<UnitQuiz>;
+  UpdateCurrentLessonIdInput: UpdateCurrentLessonIdInput;
   UpdateUserDetailsInput: UpdateUserDetailsInput;
   UserDetails: ResolverTypeWrapper<UserDetails>;
 }>;
@@ -394,6 +407,7 @@ export type ResolversParentTypes = ResolversObject<{
   UnitExercise: UnitExercise;
   UnitLesson: UnitLesson;
   UnitQuiz: UnitQuiz;
+  UpdateCurrentLessonIdInput: UpdateCurrentLessonIdInput;
   UpdateUserDetailsInput: UpdateUserDetailsInput;
   UserDetails: UserDetails;
 }>;
@@ -473,6 +487,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   generateQuiz?: Resolver<ResolversTypes['UnitQuiz'], ParentType, ContextType, RequireFields<MutationGenerateQuizArgs, 'id'>>;
   generateUnits?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationGenerateUnitsArgs, 'id'>>;
   toggleCourseEnrollment?: Resolver<ResolversTypes['CourseEnrollment'], ParentType, ContextType, RequireFields<MutationToggleCourseEnrollmentArgs, 'courseId' | 'userId'>>;
+  updateCurrentLessonId?: Resolver<ResolversTypes['CourseProgress'], ParentType, ContextType, Partial<MutationUpdateCurrentLessonIdArgs>>;
   updateUserDetails?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType, RequireFields<MutationUpdateUserDetailsArgs, 'userId'>>;
 }>;
 

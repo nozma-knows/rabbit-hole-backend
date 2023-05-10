@@ -1,3 +1,4 @@
+import { CourseEnrollment } from "./../../__generated__/resolvers-types";
 import { PrismaClient } from "@prisma/client";
 import {
   CoursePrereq,
@@ -11,6 +12,7 @@ import {
   Status,
   UnitExercise,
   UnitLesson,
+  UpdateCurrentLessonIdInput,
 } from "../../__generated__/resolvers-types";
 import { z } from "zod";
 const { OpenAI, PromptTemplate } = require("langchain");
@@ -1128,5 +1130,61 @@ export const courseMutationResolvers: CourseResolvers = {
     }
 
     return lesson;
+  },
+
+  // Update Current Lesson Id
+  updateCurrentLessonId: async (
+    _parent: any,
+    args: { input: UpdateCurrentLessonIdInput },
+    contextValue: Context
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { userId, courseId, lessonId } = args.input;
+
+    // Grab args error handling
+    if (!userId || !courseId || !lessonId) {
+      throw new Error("Missing required fields.");
+    }
+
+    const enrollment = await prisma.enrollment.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+    });
+
+    // Create enrollment error handling
+    if (!enrollment) {
+      throw new Error("Failed to find enrollment");
+    }
+
+    console.log("enrollment: ", enrollment);
+
+    // Update course progress
+    const progress = await prisma.courseProgress.update({
+      where: {
+        enrollmentId: enrollment.id,
+      },
+      data: {
+        currentLessonId: lessonId,
+      },
+    });
+
+    // Update course progress error handling
+    if (!progress) {
+      throw new Error("Failed to update course progress");
+    }
+
+    return progress;
   },
 };
