@@ -195,7 +195,7 @@ export const courseQueryResolvers: CourseResolvers = {
     const enrollments = await prisma.enrollment.findMany({
       where: { userId },
       include: {
-        // course: true,
+        course: true,
         progress: true,
       },
     });
