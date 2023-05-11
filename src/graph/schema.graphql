@@ -97,6 +97,30 @@ enum Status {
   COMPLETED
 }
 
+type QuizResponse {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  response: String!
+  questionId: String!
+  question: QuizQuestion!
+  quizAttemptId: String!
+  quizAttempt: QuizAttempt!
+}
+
+type QuizAttempt {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  status: Status!
+  attempt: Int!
+  responses: [QuizResponse]!
+  quizId: String!
+  quiz: UnitQuiz!
+  courseProgressId: String!
+  courseProgress: CourseProgress!
+}
+
 type CourseProgress {
   id: ID!
   createdAt: String!
@@ -105,7 +129,7 @@ type CourseProgress {
   enrollment: CourseEnrollment!
   lessonsCompleted: [String]!
   exercisesCompleted: [String]!
-  quizzesCompleted: [String]!
+  quizAttempts: [QuizAttempt]!
   status: Status!
   currentLessonId: String
 }
@@ -172,6 +196,17 @@ input UpdateCompletedLessonsInput {
   lessonId: String!
 }
 
+input UpdateQuizAttemptInput {
+  status: Status
+  response: String
+}
+
+input CreateQuizAttemptInput {
+  quizId: String!
+  courseProgressId: String!
+  attempt: Int!
+}
+
 type Query {
   course(id: String!): Course
   courses(authorId: String!): [Course]!
@@ -197,4 +232,6 @@ type Mutation {
   ): UserDetails!
   updateCurrentLessonId(input: UpdateCurrentLessonIdInput): CourseProgress!
   updateCompletedLessons(input: UpdateCompletedLessonsInput): CourseProgress!
+  createQuizAttempt(input: CreateQuizAttemptInput): QuizAttempt!
+  updateQuizAttempt(id: String!, input: UpdateQuizAttemptInput): QuizAttempt!
 }

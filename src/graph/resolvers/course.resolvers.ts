@@ -1,6 +1,8 @@
 import {
   CourseEnrollment,
   UpdateCompletedLessonsInput,
+  UpdateQuizAttemptInput,
+  CreateQuizAttemptInput,
 } from "./../../__generated__/resolvers-types";
 import { PrismaClient } from "@prisma/client";
 import {
@@ -268,7 +270,6 @@ export const courseMutationResolvers: CourseResolvers = {
                   id: crypto.randomUUID(),
                   lessonsCompleted: [],
                   exercisesCompleted: [],
-                  quizzesCompleted: [],
                   status: Status.Pending,
                 },
               },
@@ -1108,6 +1109,97 @@ export const courseMutationResolvers: CourseResolvers = {
       (quiz: { id: string }) => quiz.id === quizId
     ); // Return course
   },
+
+  // Create Quiz Attempt
+  createQuizAttempt: async (
+    _parent: any,
+    args: { input: CreateQuizAttemptInput },
+    contextValue: Context
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { quizId, courseProgressId, attempt } = args.input;
+
+    // Grab args error handling
+    if (!quizId || !courseProgressId || !attempt) {
+      throw new Error("Missing required fields.");
+    }
+
+    // Create quiz attempt
+    const quizAttempt = prisma.quizAttempt.create({
+      data: {
+        quizId,
+        courseProgressId,
+        attempt,
+        status: Status.Pending,
+      },
+    });
+
+    // Create quiz attempt error handling
+    if (!quizAttempt) {
+      throw new Error("Failed to create quiz attempt.");
+    }
+
+    return quizAttempt;
+  },
+
+  // // Update Quiz Attempt
+  // updateQuizAttempt: async (
+  //   _parent: any,
+  //   args: { id: string; input: UpdateQuizAttemptInput },
+  //   contextValue: Context
+  // ) => {
+  //   // Grab prisma client
+  //   const { prisma } = contextValue;
+  //   // Grab prisma client error handling
+  //   if (!prisma) {
+  //     throw new Error("Failed to find prisma client.");
+  //   }
+
+  //   // Grab userId
+  //   const { id } = args;
+
+  //   // Grab userId error handling
+  //   if (!id) {
+  //     throw new Error("Missing required fields.");
+  //   }
+
+  //   // Grab args
+  //   const { attempt, response, status } = args.input;
+
+  //   // Check if quiz attempt exists
+  //   const quizAttempt = await prisma.quizAttempt.findUnique({})
+
+  //   const userDetails = await prisma.userDetails.update({
+  //     where: {
+  //       userId,
+  //     },
+  //     data: {
+  //       userId,
+  //       firstName: firstName,
+  //       lastName: lastName,
+  //       nickname: nickname,
+  //       dob: dob,
+  //       pronouns: pronouns ? (pronouns as string[]) : undefined,
+  //       educationLevel: educationLevel,
+  //       occupation: occupation,
+  //       interests: interests ? (interests as string[]) : undefined,
+  //       learningStyle: learningStyle,
+  //     },
+  //   });
+
+  //   if (!userDetails) {
+  //     throw new Error("Failed to update user details.");
+  //   }
+  //   return userDetails;
+  // },
 
   // Generate lesson mutation resolver
   generateLesson: async (
