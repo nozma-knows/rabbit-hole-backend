@@ -3,6 +3,7 @@ import {
   UpdateCompletedLessonsInput,
   UpdateQuizAttemptInput,
   CreateQuizAttemptInput,
+  QuizResponse,
 } from "./../../__generated__/resolvers-types";
 import { PrismaClient } from "@prisma/client";
 import {
@@ -1148,6 +1149,133 @@ export const courseMutationResolvers: CourseResolvers = {
     }
 
     return quizAttempt;
+  },
+
+  // Update Quiz Attempt
+  updateQuizAttempt: async (
+    _parent: any,
+    args: { id: string; input: UpdateQuizAttemptInput },
+    contextValue: Context
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { id } = args;
+
+    // Grab args error handling
+    if (!id) {
+      throw new Error("Missing required fields.");
+    }
+
+    // Grab args
+    const { questionId, status, response } = args.input;
+
+    // Grab args error handling
+    if (!questionId) {
+      throw new Error("Missing required fields.");
+    }
+
+    // Create quiz attempt
+    const quizAttempt = await prisma.quizAttempt.findUnique({
+      where: { id },
+      include: {
+        responses: true,
+        quiz: {
+          include: {
+            questions: true,
+          },
+        },
+      },
+    });
+
+    // Create quiz attempt error handling
+    if (!quizAttempt) {
+      throw new Error("Failed to find quiz attempt.");
+    }
+
+    let questionResponse;
+
+    const existingResponse = quizAttempt.responses.find(
+      (response) => response.questionId === questionId
+    );
+    if (existingResponse) {
+      questionResponse = await prisma.quizResponse.update({
+        where: {
+          id: existingResponse.id,
+        },
+        data: {
+          response,
+        },
+      });
+    } else {
+      // Create question response
+      questionResponse = await prisma.quizResponse.create({
+        data: {
+          id: crypto.randomUUID(),
+          questionId,
+          response,
+          quizAttemptId: quizAttempt.id,
+        },
+      });
+    }
+
+    // Create quiz response error handling
+    if (!questionResponse) {
+      throw new Error("Failed to create quiz response.");
+    }
+
+    // Update quiz attempt
+    let updatedQuizAttempt;
+
+    if (existingResponse) {
+      updatedQuizAttempt = await prisma.quizAttempt.findUnique({
+        where: { id },
+        include: {
+          responses: true,
+          quiz: {
+            include: {
+              questions: true,
+            },
+          },
+        },
+      });
+    } else {
+      updatedQuizAttempt = prisma.quizAttempt.update({
+        where: { id },
+        data: {
+          status:
+            quizAttempt.responses.length === quizAttempt.quiz.questions.length
+              ? Status.Completed
+              : Status.InProgress,
+          responses: {
+            connect: {
+              id: questionResponse.id,
+            },
+          },
+        },
+        include: {
+          responses: true,
+          quiz: {
+            include: {
+              questions: true,
+            },
+          },
+        },
+      });
+    }
+
+    // Update quiz attempt error handling
+    if (!updatedQuizAttempt) {
+      throw new Error("Failed to update quiz attempt.");
+    }
+
+    return updatedQuizAttempt;
   },
 
   // // Update Quiz Attempt

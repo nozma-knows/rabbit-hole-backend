@@ -330,7 +330,8 @@ export type UpdateCurrentLessonIdInput = {
 };
 
 export type UpdateQuizAttemptInput = {
-  response?: InputMaybe<Scalars['String']>;
+  questionId: Scalars['String'];
+  response: Scalars['String'];
   status?: InputMaybe<Status>;
 };
 
