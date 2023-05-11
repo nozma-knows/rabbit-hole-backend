@@ -198,7 +198,7 @@ input UpdateCompletedLessonsInput {
 
 input UpdateQuizAttemptInput {
   questionId: String!
-  response: String!
+  response: String
   status: Status
 }
 

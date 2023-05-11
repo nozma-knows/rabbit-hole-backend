@@ -1210,7 +1210,7 @@ export const courseMutationResolvers: CourseResolvers = {
           id: existingResponse.id,
         },
         data: {
-          response,
+          response: response || undefined,
         },
       });
     } else {
@@ -1219,7 +1219,7 @@ export const courseMutationResolvers: CourseResolvers = {
         data: {
           id: crypto.randomUUID(),
           questionId,
-          response,
+          response: response!,
           quizAttemptId: quizAttempt.id,
         },
       });
@@ -1234,8 +1234,11 @@ export const courseMutationResolvers: CourseResolvers = {
     let updatedQuizAttempt;
 
     if (existingResponse) {
-      updatedQuizAttempt = await prisma.quizAttempt.findUnique({
+      updatedQuizAttempt = await prisma.quizAttempt.update({
         where: { id },
+        data: {
+          status: status || Status.InProgress,
+        },
         include: {
           responses: true,
           quiz: {
@@ -1249,10 +1252,7 @@ export const courseMutationResolvers: CourseResolvers = {
       updatedQuizAttempt = prisma.quizAttempt.update({
         where: { id },
         data: {
-          status:
-            quizAttempt.responses.length === quizAttempt.quiz.questions.length
-              ? Status.Completed
-              : Status.InProgress,
+          status: status || Status.InProgress,
           responses: {
             connect: {
               id: questionResponse.id,
