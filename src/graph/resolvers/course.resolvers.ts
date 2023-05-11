@@ -1126,19 +1126,47 @@ export const courseMutationResolvers: CourseResolvers = {
     }
 
     // Grab args
-    const { quizId, courseProgressId, attempt } = args.input;
+    const { quizId, courseProgressId, attempt, response, questionId } =
+      args.input;
 
     // Grab args error handling
-    if (!quizId || !courseProgressId || !attempt) {
+    if (!quizId || !courseProgressId || !attempt || !response || !questionId) {
       throw new Error("Missing required fields.");
     }
 
+    let quizAttempt;
+
+    // Grab quizAttempt
+    quizAttempt = await prisma.quizAttempt.findUnique({
+      where: {
+        quizId_courseProgressId_attempt: {
+          quizId,
+          courseProgressId,
+          attempt,
+        },
+      },
+    });
+
+    // Grab quizAttempt error handling
+    if (quizAttempt) {
+      return quizAttempt;
+    }
+
     // Create quiz attempt
-    const quizAttempt = prisma.quizAttempt.create({
+    quizAttempt = prisma.quizAttempt.create({
       data: {
         quizId,
         courseProgressId,
         attempt,
+        responses: {
+          create: [
+            {
+              id: crypto.randomUUID(),
+              questionId,
+              response,
+            },
+          ],
+        },
         status: Status.Pending,
       },
     });

@@ -116,6 +116,8 @@ model QuizAttempt {
   quiz             UnitQuiz       @relation(fields: [quizId], references: [id])
   courseProgressId String
   courseProgress   CourseProgress @relation(fields: [courseProgressId], references: [id])
+
+  @@unique([quizId, courseProgressId, attempt])
 }
 
 model CourseProgress {

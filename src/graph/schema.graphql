@@ -204,8 +204,10 @@ input UpdateQuizAttemptInput {
 
 input CreateQuizAttemptInput {
   quizId: String!
+  questionId: String!
   courseProgressId: String!
   attempt: Int!
+  response: String!
 }
 
 type Query {

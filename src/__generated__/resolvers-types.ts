@@ -90,7 +90,9 @@ export type CreateCourseInput = {
 export type CreateQuizAttemptInput = {
   attempt: Scalars['Int'];
   courseProgressId: Scalars['String'];
+  questionId: Scalars['String'];
   quizId: Scalars['String'];
+  response: Scalars['String'];
 };
 
 export type GenerateLessonInput = {
