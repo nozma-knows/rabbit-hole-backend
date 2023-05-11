@@ -161,7 +161,20 @@ export const courseQueryResolvers: CourseResolvers = {
             },
           },
         },
-        progress: true,
+        progress: {
+          include: {
+            quizAttempts: {
+              select: {
+                id: true,
+                attempt: true,
+                responses: true,
+                status: true,
+                quizId: true,
+                courseProgressId: true,
+              },
+            },
+          },
+        },
       },
     });
 
