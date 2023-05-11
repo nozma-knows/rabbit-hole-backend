@@ -75,6 +75,7 @@ export type CourseUnit = {
   exercises?: Maybe<Array<Maybe<UnitExercise>>>;
   id: Scalars['ID'];
   lessons: Array<Maybe<UnitLesson>>;
+  order: Scalars['Int'];
   quizzes: Array<Maybe<UnitQuiz>>;
   title: Scalars['String'];
   updatedAt: Scalars['String'];
@@ -253,6 +254,7 @@ export type UnitLesson = {
   content: Scalars['String'];
   createdAt: Scalars['String'];
   id: Scalars['ID'];
+  order: Scalars['Int'];
   title: Scalars['String'];
   topics: Scalars['String'];
   unit: CourseUnit;
@@ -393,6 +395,7 @@ export type ResolversTypes = ResolversObject<{
   CreateCourseInput: CreateCourseInput;
   GenerateLessonInput: GenerateLessonInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   PrereqTopic: ResolverTypeWrapper<PrereqTopic>;
   Query: ResolverTypeWrapper<{}>;
@@ -419,6 +422,7 @@ export type ResolversParentTypes = ResolversObject<{
   CreateCourseInput: CreateCourseInput;
   GenerateLessonInput: GenerateLessonInput;
   ID: Scalars['ID'];
+  Int: Scalars['Int'];
   Mutation: {};
   PrereqTopic: PrereqTopic;
   Query: {};
@@ -492,6 +496,7 @@ export type CourseUnitResolvers<ContextType = Context, ParentType extends Resolv
   exercises?: Resolver<Maybe<Array<Maybe<ResolversTypes['UnitExercise']>>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   lessons?: Resolver<Array<Maybe<ResolversTypes['UnitLesson']>>, ParentType, ContextType>;
+  order?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   quizzes?: Resolver<Array<Maybe<ResolversTypes['UnitQuiz']>>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -559,6 +564,7 @@ export type UnitLessonResolvers<ContextType = Context, ParentType extends Resolv
   content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  order?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   topics?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unit?: Resolver<ResolversTypes['CourseUnit'], ParentType, ContextType>;

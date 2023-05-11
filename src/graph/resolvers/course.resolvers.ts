@@ -638,7 +638,7 @@ export const courseMutationResolvers: CourseResolvers = {
 
     // Create promptTemplate
     const promptTemplate = new PromptTemplate({
-      template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Each unit should contain a minimum of 3 lessons. Output should be an object with a key of units and value that is an array of units. Output should be in JSON format. Each unit should include a title, description and list of lessons. Each lesson should include a title and a list of topics. Each topic should be a string.`,
+      template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Each unit should contain a minimum of 3 lessons. Output should be an object with a key of units and value that is an array of units. Output should be in JSON format. Each unit should include a title, description, and a list of lessons. Each lesson should include a title and a list of topics. Each topic should be a string.`,
       inputVariables: ["title", "description"],
     });
 
@@ -674,7 +674,7 @@ export const courseMutationResolvers: CourseResolvers = {
     // Create course prereqs
     const units: any[] = [];
     await prisma.courseUnit.createMany({
-      data: parsedResult.map((u: CourseUnit) => {
+      data: parsedResult.map((u: CourseUnit, index: number) => {
         const unitId = crypto.randomUUID();
         const unit = {
           id: unitId,
@@ -682,6 +682,7 @@ export const courseMutationResolvers: CourseResolvers = {
           title: u.title,
           description: u.description,
           lessons: u.lessons,
+          order: index + 1,
         };
         units.push(unit);
         return {
@@ -689,6 +690,7 @@ export const courseMutationResolvers: CourseResolvers = {
           courseId: courseId,
           title: u.title,
           description: u.description,
+          order: index + 1,
         };
       }),
     });
@@ -702,7 +704,7 @@ export const courseMutationResolvers: CourseResolvers = {
     units.map(async (unit: CourseUnit) => {
       const lessonIds: string[] = [];
       await prisma.unitLesson.createMany({
-        data: unit.lessons.map((lesson: Maybe<UnitLesson>) => {
+        data: unit.lessons.map((lesson: Maybe<UnitLesson>, index: number) => {
           const lessonId = crypto.randomUUID();
           lessonIds.push(lessonId);
           return {
@@ -711,6 +713,7 @@ export const courseMutationResolvers: CourseResolvers = {
             title: lesson ? lesson.title : "",
             topics: lesson ? lesson.topics.toString() : "",
             content: "",
+            order: index + 1,
           };
         }),
       });

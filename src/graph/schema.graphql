@@ -45,6 +45,7 @@ type UnitLesson {
   title: String!
   topics: String!
   content: String!
+  order: Int!
 }
 
 type UnitExercise {
@@ -87,6 +88,7 @@ type CourseUnit {
   lessons: [UnitLesson]!
   exercises: [UnitExercise]
   quizzes: [UnitQuiz]!
+  order: Int!
 }
 
 enum Status {
