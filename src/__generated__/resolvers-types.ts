@@ -119,6 +119,7 @@ export type Mutation = {
   updateCompletedLessons: CourseProgress;
   updateCurrentLessonId: CourseProgress;
   updateQuizAttempt: QuizAttempt;
+  updateQuizAttemptStatus: QuizAttempt;
   updateUserDetails: UserDetails;
 };
 
@@ -187,6 +188,12 @@ export type MutationUpdateCurrentLessonIdArgs = {
 export type MutationUpdateQuizAttemptArgs = {
   id: Scalars['String'];
   input?: InputMaybe<UpdateQuizAttemptInput>;
+};
+
+
+export type MutationUpdateQuizAttemptStatusArgs = {
+  id: Scalars['String'];
+  status?: InputMaybe<Status>;
 };
 
 
@@ -578,6 +585,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   updateCompletedLessons?: Resolver<ResolversTypes['CourseProgress'], ParentType, ContextType, Partial<MutationUpdateCompletedLessonsArgs>>;
   updateCurrentLessonId?: Resolver<ResolversTypes['CourseProgress'], ParentType, ContextType, Partial<MutationUpdateCurrentLessonIdArgs>>;
   updateQuizAttempt?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, RequireFields<MutationUpdateQuizAttemptArgs, 'id'>>;
+  updateQuizAttemptStatus?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, RequireFields<MutationUpdateQuizAttemptStatusArgs, 'id'>>;
   updateUserDetails?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType, RequireFields<MutationUpdateUserDetailsArgs, 'userId'>>;
 }>;
 

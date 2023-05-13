@@ -1319,6 +1319,54 @@ export const courseMutationResolvers: CourseResolvers = {
     return updatedQuizAttempt;
   },
 
+  // Update Quiz Attempt Status
+  updateQuizAttemptStatus: async (
+    _parent: any,
+    args: { id: string; status: Status },
+    contextValue: Context
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { id, status } = args;
+
+    // Grab args error handling
+    if (!id || !status) {
+      throw new Error("Missing required fields.");
+    }
+
+    // Grab quiz attempt
+    const quizAttempt = await prisma.quizAttempt.findUnique({
+      where: { id },
+    });
+
+    // Grab quiz attempt error handling
+    if (!quizAttempt) {
+      throw new Error("Failed to find quiz attempt.");
+    }
+
+    // Update quiz attempt status
+    const updatedQuizAttempt = await prisma.quizAttempt.update({
+      where: { id },
+      data: {
+        status,
+      },
+    });
+
+    // Update quiz attempt error handling
+    if (!updatedQuizAttempt) {
+      throw new Error("Failed to update quiz attempt.");
+    }
+
+    return updatedQuizAttempt;
+  },
+
   // // Update Quiz Attempt
   // updateQuizAttempt: async (
   //   _parent: any,

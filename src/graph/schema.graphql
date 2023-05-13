@@ -237,4 +237,5 @@ type Mutation {
   updateCompletedLessons(input: UpdateCompletedLessonsInput): CourseProgress!
   createQuizAttempt(input: CreateQuizAttemptInput): QuizAttempt!
   updateQuizAttempt(id: String!, input: UpdateQuizAttemptInput): QuizAttempt!
+  updateQuizAttemptStatus(id: String!, status: Status): QuizAttempt!
 }
