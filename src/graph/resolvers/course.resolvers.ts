@@ -167,7 +167,11 @@ export const courseQueryResolvers: CourseResolvers = {
               select: {
                 id: true,
                 attempt: true,
-                responses: true,
+                responses: {
+                  include: {
+                    question: true,
+                  },
+                },
                 status: true,
                 quizId: true,
                 courseProgressId: true,
