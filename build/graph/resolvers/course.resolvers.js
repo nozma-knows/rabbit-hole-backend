@@ -80,6 +80,56 @@ exports.courseQueryResolvers = {
         }
         return courses;
     }),
+    // Enrollment query resolver
+    enrollment: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
+        // Grab prisma client
+        const { prisma } = contextValue;
+        if (!prisma) {
+            throw new Error("Failed to find prisma client.");
+        }
+        // Grab args
+        const { userId, courseId } = args;
+        // Grab args error handling
+        if (!userId || !courseId) {
+            throw new Error("Missing required fields");
+        }
+        // Find enrollment
+        const enrollment = yield prisma.enrollment.findUnique({
+            where: {
+                userId_courseId: {
+                    userId,
+                    courseId,
+                },
+            },
+            include: {
+                course: {
+                    include: {
+                        prereqs: {
+                            include: {
+                                topics: true,
+                            },
+                        },
+                        units: {
+                            include: {
+                                lessons: true,
+                                quizzes: {
+                                    include: {
+                                        questions: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                progress: true,
+            },
+        });
+        // Find courses error handling
+        if (!enrollment) {
+            throw new Error("Failed to find courses");
+        }
+        return enrollment;
+    }),
     // EnrolledIn query resolver
     enrolledIn: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
         // Grab prisma client
@@ -98,6 +148,7 @@ exports.courseQueryResolvers = {
             where: { userId },
             include: {
                 course: true,
+                progress: true,
             },
         });
         // Find courses error handling
@@ -457,7 +508,7 @@ exports.courseMutationResolvers = {
         // });
         // Create promptTemplate
         const promptTemplate = new PromptTemplate({
-            template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Each unit should contain a minimum of 3 lessons. Output should be an object with a key of units and value that is an array of units. Output should be in JSON format. Each unit should include a title, description and list of lessons. Each lesson should include a title and a list of topics. Each topic should be a string.`,
+            template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Each unit should contain a minimum of 3 lessons. Output should be an object with a key of units and value that is an array of units. Output should be in JSON format. Each unit should include a title, description, and a list of lessons. Each lesson should include a title and a list of topics. Each topic should be a string.`,
             inputVariables: ["title", "description"],
         });
         // Create promptTemplate error handling
@@ -486,7 +537,7 @@ exports.courseMutationResolvers = {
         // Create course prereqs
         const units = [];
         yield prisma.courseUnit.createMany({
-            data: parsedResult.map((u) => {
+            data: parsedResult.map((u, index) => {
                 const unitId = crypto.randomUUID();
                 const unit = {
                     id: unitId,
@@ -494,6 +545,7 @@ exports.courseMutationResolvers = {
                     title: u.title,
                     description: u.description,
                     lessons: u.lessons,
+                    order: index + 1,
                 };
                 units.push(unit);
                 return {
@@ -501,6 +553,7 @@ exports.courseMutationResolvers = {
                     courseId: courseId,
                     title: u.title,
                     description: u.description,
+                    order: index + 1,
                 };
             }),
         });
@@ -512,7 +565,7 @@ exports.courseMutationResolvers = {
         units.map((unit) => __awaiter(void 0, void 0, void 0, function* () {
             const lessonIds = [];
             yield prisma.unitLesson.createMany({
-                data: unit.lessons.map((lesson) => {
+                data: unit.lessons.map((lesson, index) => {
                     const lessonId = crypto.randomUUID();
                     lessonIds.push(lessonId);
                     return {
@@ -521,6 +574,7 @@ exports.courseMutationResolvers = {
                         title: lesson ? lesson.title : "",
                         topics: lesson ? lesson.topics.toString() : "",
                         content: "",
+                        order: index + 1,
                     };
                 }),
             });
@@ -905,5 +959,106 @@ exports.courseMutationResolvers = {
             throw new Error("Failed to update lesson with content");
         }
         return lesson;
+    }),
+    // Update Current Lesson Id
+    updateCurrentLessonId: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
+        // Grab prisma client
+        const { prisma } = contextValue;
+        // Grab prisma client error handling
+        if (!prisma) {
+            throw new Error("Failed to find prisma client.");
+        }
+        // Grab args
+        const { userId, courseId, lessonId } = args.input;
+        // Grab args error handling
+        if (!userId || !courseId || !lessonId) {
+            throw new Error("Missing required fields.");
+        }
+        const enrollment = yield prisma.enrollment.findUnique({
+            where: {
+                userId_courseId: {
+                    userId,
+                    courseId,
+                },
+            },
+        });
+        // Create enrollment error handling
+        if (!enrollment) {
+            throw new Error("Failed to find enrollment");
+        }
+        // Update course progress
+        const progress = yield prisma.courseProgress.update({
+            where: {
+                enrollmentId: enrollment.id,
+            },
+            data: {
+                currentLessonId: lessonId,
+            },
+        });
+        // Update course progress error handling
+        if (!progress) {
+            throw new Error("Failed to update course progress");
+        }
+        return progress;
+    }),
+    // Update Completed Lessons
+    updateCompletedLessons: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
+        // Grab prisma client
+        const { prisma } = contextValue;
+        // Grab prisma client error handling
+        if (!prisma) {
+            throw new Error("Failed to find prisma client.");
+        }
+        // Grab args
+        const { userId, courseId, lessonId } = args.input;
+        // Grab args error handling
+        if (!userId || !courseId || !lessonId) {
+            throw new Error("Missing required fields.");
+        }
+        const enrollment = yield prisma.enrollment.findUnique({
+            where: {
+                userId_courseId: {
+                    userId,
+                    courseId,
+                },
+            },
+            include: {
+                progress: true,
+            },
+        });
+        // Create enrollment error handling
+        if (!enrollment) {
+            throw new Error("Failed to find enrollment");
+        }
+        let progress = enrollment.progress;
+        if (enrollment.progress.lessonsCompleted.find((id) => id === lessonId)) {
+            progress = yield prisma.courseProgress.update({
+                where: {
+                    enrollmentId: enrollment.id,
+                },
+                data: {
+                    lessonsCompleted: progress.lessonsCompleted.filter((id) => id !== lessonId),
+                },
+            });
+        }
+        else {
+            // Update course progress
+            progress = yield prisma.courseProgress.update({
+                where: {
+                    enrollmentId: enrollment.id,
+                },
+                data: {
+                    lessonsCompleted: [
+                        ...enrollment.progress.lessonsCompleted,
+                        lessonId,
+                    ],
+                },
+            });
+        }
+        // Update course progress error handling
+        if (!progress) {
+            throw new Error("Failed to update course progress");
+        }
+        return progress;
     }),
 };

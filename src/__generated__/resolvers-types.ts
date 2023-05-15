@@ -61,7 +61,7 @@ export type CourseProgress = {
   exercisesCompleted: Array<Maybe<Scalars['String']>>;
   id: Scalars['ID'];
   lessonsCompleted: Array<Maybe<Scalars['String']>>;
-  quizzesCompleted: Array<Maybe<Scalars['String']>>;
+  quizAttempts: Array<Maybe<QuizAttempt>>;
   status: Status;
   updatedAt: Scalars['String'];
 };
@@ -87,6 +87,14 @@ export type CreateCourseInput = {
   title: Scalars['String'];
 };
 
+export type CreateQuizAttemptInput = {
+  attempt: Scalars['Int'];
+  courseProgressId: Scalars['String'];
+  questionId: Scalars['String'];
+  quizId: Scalars['String'];
+  response: Scalars['String'];
+};
+
 export type GenerateLessonInput = {
   courseDescription: Scalars['String'];
   courseTitle: Scalars['String'];
@@ -99,6 +107,7 @@ export type GenerateLessonInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createCourse: Course;
+  createQuizAttempt: QuizAttempt;
   createUserDetails: UserDetails;
   deleteCourse: Course;
   generateExercises: Array<Maybe<UnitExercise>>;
@@ -109,12 +118,19 @@ export type Mutation = {
   toggleCourseEnrollment: CourseEnrollment;
   updateCompletedLessons: CourseProgress;
   updateCurrentLessonId: CourseProgress;
+  updateQuizAttempt: QuizAttempt;
+  updateQuizAttemptStatus: QuizAttempt;
   updateUserDetails: UserDetails;
 };
 
 
 export type MutationCreateCourseArgs = {
   input: CreateCourseInput;
+};
+
+
+export type MutationCreateQuizAttemptArgs = {
+  input?: InputMaybe<CreateQuizAttemptInput>;
 };
 
 
@@ -166,6 +182,18 @@ export type MutationUpdateCompletedLessonsArgs = {
 
 export type MutationUpdateCurrentLessonIdArgs = {
   input?: InputMaybe<UpdateCurrentLessonIdInput>;
+};
+
+
+export type MutationUpdateQuizAttemptArgs = {
+  id: Scalars['String'];
+  input?: InputMaybe<UpdateQuizAttemptInput>;
+};
+
+
+export type MutationUpdateQuizAttemptStatusArgs = {
+  id: Scalars['String'];
+  status?: InputMaybe<Status>;
 };
 
 
@@ -221,6 +249,20 @@ export type QueryUserDetailsArgs = {
   userId: Scalars['String'];
 };
 
+export type QuizAttempt = {
+  __typename?: 'QuizAttempt';
+  attempt: Scalars['Int'];
+  courseProgress: CourseProgress;
+  courseProgressId: Scalars['String'];
+  createdAt: Scalars['String'];
+  id: Scalars['ID'];
+  quiz: UnitQuiz;
+  quizId: Scalars['String'];
+  responses: Array<Maybe<QuizResponse>>;
+  status: Status;
+  updatedAt: Scalars['String'];
+};
+
 export type QuizQuestion = {
   __typename?: 'QuizQuestion';
   answer: Scalars['String'];
@@ -230,6 +272,18 @@ export type QuizQuestion = {
   question: Scalars['String'];
   unit: CourseUnit;
   unitId: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type QuizResponse = {
+  __typename?: 'QuizResponse';
+  createdAt: Scalars['String'];
+  id: Scalars['ID'];
+  question: QuizQuestion;
+  questionId: Scalars['String'];
+  quizAttempt: QuizAttempt;
+  quizAttemptId: Scalars['String'];
+  response: Scalars['String'];
   updatedAt: Scalars['String'];
 };
 
@@ -282,6 +336,12 @@ export type UpdateCurrentLessonIdInput = {
   courseId: Scalars['String'];
   lessonId: Scalars['String'];
   userId: Scalars['String'];
+};
+
+export type UpdateQuizAttemptInput = {
+  questionId: Scalars['String'];
+  response?: InputMaybe<Scalars['String']>;
+  status?: InputMaybe<Status>;
 };
 
 export type UpdateUserDetailsInput = {
@@ -393,13 +453,16 @@ export type ResolversTypes = ResolversObject<{
   CourseProgress: ResolverTypeWrapper<CourseProgress>;
   CourseUnit: ResolverTypeWrapper<CourseUnit>;
   CreateCourseInput: CreateCourseInput;
+  CreateQuizAttemptInput: CreateQuizAttemptInput;
   GenerateLessonInput: GenerateLessonInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   PrereqTopic: ResolverTypeWrapper<PrereqTopic>;
   Query: ResolverTypeWrapper<{}>;
+  QuizAttempt: ResolverTypeWrapper<QuizAttempt>;
   QuizQuestion: ResolverTypeWrapper<QuizQuestion>;
+  QuizResponse: ResolverTypeWrapper<QuizResponse>;
   Status: Status;
   String: ResolverTypeWrapper<Scalars['String']>;
   UnitExercise: ResolverTypeWrapper<UnitExercise>;
@@ -407,6 +470,7 @@ export type ResolversTypes = ResolversObject<{
   UnitQuiz: ResolverTypeWrapper<UnitQuiz>;
   UpdateCompletedLessonsInput: UpdateCompletedLessonsInput;
   UpdateCurrentLessonIdInput: UpdateCurrentLessonIdInput;
+  UpdateQuizAttemptInput: UpdateQuizAttemptInput;
   UpdateUserDetailsInput: UpdateUserDetailsInput;
   UserDetails: ResolverTypeWrapper<UserDetails>;
 }>;
@@ -420,19 +484,23 @@ export type ResolversParentTypes = ResolversObject<{
   CourseProgress: CourseProgress;
   CourseUnit: CourseUnit;
   CreateCourseInput: CreateCourseInput;
+  CreateQuizAttemptInput: CreateQuizAttemptInput;
   GenerateLessonInput: GenerateLessonInput;
   ID: Scalars['ID'];
   Int: Scalars['Int'];
   Mutation: {};
   PrereqTopic: PrereqTopic;
   Query: {};
+  QuizAttempt: QuizAttempt;
   QuizQuestion: QuizQuestion;
+  QuizResponse: QuizResponse;
   String: Scalars['String'];
   UnitExercise: UnitExercise;
   UnitLesson: UnitLesson;
   UnitQuiz: UnitQuiz;
   UpdateCompletedLessonsInput: UpdateCompletedLessonsInput;
   UpdateCurrentLessonIdInput: UpdateCurrentLessonIdInput;
+  UpdateQuizAttemptInput: UpdateQuizAttemptInput;
   UpdateUserDetailsInput: UpdateUserDetailsInput;
   UserDetails: UserDetails;
 }>;
@@ -482,7 +550,7 @@ export type CourseProgressResolvers<ContextType = Context, ParentType extends Re
   exercisesCompleted?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   lessonsCompleted?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
-  quizzesCompleted?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
+  quizAttempts?: Resolver<Array<Maybe<ResolversTypes['QuizAttempt']>>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['Status'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -505,6 +573,7 @@ export type CourseUnitResolvers<ContextType = Context, ParentType extends Resolv
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createCourse?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreateCourseArgs, 'input'>>;
+  createQuizAttempt?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, Partial<MutationCreateQuizAttemptArgs>>;
   createUserDetails?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType, RequireFields<MutationCreateUserDetailsArgs, 'userId'>>;
   deleteCourse?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationDeleteCourseArgs, 'id'>>;
   generateExercises?: Resolver<Array<Maybe<ResolversTypes['UnitExercise']>>, ParentType, ContextType, RequireFields<MutationGenerateExercisesArgs, 'id'>>;
@@ -515,6 +584,8 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   toggleCourseEnrollment?: Resolver<ResolversTypes['CourseEnrollment'], ParentType, ContextType, RequireFields<MutationToggleCourseEnrollmentArgs, 'courseId' | 'userId'>>;
   updateCompletedLessons?: Resolver<ResolversTypes['CourseProgress'], ParentType, ContextType, Partial<MutationUpdateCompletedLessonsArgs>>;
   updateCurrentLessonId?: Resolver<ResolversTypes['CourseProgress'], ParentType, ContextType, Partial<MutationUpdateCurrentLessonIdArgs>>;
+  updateQuizAttempt?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, RequireFields<MutationUpdateQuizAttemptArgs, 'id'>>;
+  updateQuizAttemptStatus?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, RequireFields<MutationUpdateQuizAttemptStatusArgs, 'id'>>;
   updateUserDetails?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType, RequireFields<MutationUpdateUserDetailsArgs, 'userId'>>;
 }>;
 
@@ -538,6 +609,20 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   userDetails?: Resolver<Maybe<ResolversTypes['UserDetails']>, ParentType, ContextType, RequireFields<QueryUserDetailsArgs, 'userId'>>;
 }>;
 
+export type QuizAttemptResolvers<ContextType = Context, ParentType extends ResolversParentTypes['QuizAttempt'] = ResolversParentTypes['QuizAttempt']> = ResolversObject<{
+  attempt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  courseProgress?: Resolver<ResolversTypes['CourseProgress'], ParentType, ContextType>;
+  courseProgressId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  quiz?: Resolver<ResolversTypes['UnitQuiz'], ParentType, ContextType>;
+  quizId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  responses?: Resolver<Array<Maybe<ResolversTypes['QuizResponse']>>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['Status'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QuizQuestionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['QuizQuestion'] = ResolversParentTypes['QuizQuestion']> = ResolversObject<{
   answer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   choices?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -546,6 +631,18 @@ export type QuizQuestionResolvers<ContextType = Context, ParentType extends Reso
   question?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unit?: Resolver<ResolversTypes['CourseUnit'], ParentType, ContextType>;
   unitId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type QuizResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['QuizResponse'] = ResolversParentTypes['QuizResponse']> = ResolversObject<{
+  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  question?: Resolver<ResolversTypes['QuizQuestion'], ParentType, ContextType>;
+  questionId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  quizAttempt?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType>;
+  quizAttemptId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  response?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -610,7 +707,9 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   Mutation?: MutationResolvers<ContextType>;
   PrereqTopic?: PrereqTopicResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  QuizAttempt?: QuizAttemptResolvers<ContextType>;
   QuizQuestion?: QuizQuestionResolvers<ContextType>;
+  QuizResponse?: QuizResponseResolvers<ContextType>;
   UnitExercise?: UnitExerciseResolvers<ContextType>;
   UnitLesson?: UnitLessonResolvers<ContextType>;
   UnitQuiz?: UnitQuizResolvers<ContextType>;

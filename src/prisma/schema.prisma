@@ -53,23 +53,25 @@ model UnitExercise {
 }
 
 model QuizQuestion {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  quizId    String
-  quiz      UnitQuiz @relation(fields: [quizId], references: [id])
-  question  String
-  choices   String[]
-  answer    String
+  id           String         @id @default(uuid())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  quizId       String
+  quiz         UnitQuiz       @relation(fields: [quizId], references: [id])
+  question     String
+  choices      String[]
+  answer       String
+  QuizResponse QuizResponse[]
 }
 
 model UnitQuiz {
-  id        String         @id @default(uuid())
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  unitId    String
-  unit      CourseUnit     @relation(fields: [unitId], references: [id])
-  questions QuizQuestion[]
+  id          String         @id @default(uuid())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  unitId      String
+  unit        CourseUnit     @relation(fields: [unitId], references: [id])
+  questions   QuizQuestion[]
+  QuizAttempt QuizAttempt[]
 }
 
 model CourseUnit {
@@ -92,15 +94,41 @@ enum Status {
   COMPLETED
 }
 
+model QuizResponse {
+  id            String       @id @default(uuid())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  response      String
+  questionId    String
+  question      QuizQuestion @relation(fields: [questionId], references: [id])
+  quizAttemptId String?
+  QuizAttempt   QuizAttempt? @relation(fields: [quizAttemptId], references: [id])
+}
+
+model QuizAttempt {
+  id               String         @id @default(uuid())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  status           Status
+  attempt          Int
+  responses        QuizResponse[]
+  quizId           String
+  quiz             UnitQuiz       @relation(fields: [quizId], references: [id])
+  courseProgressId String
+  courseProgress   CourseProgress @relation(fields: [courseProgressId], references: [id])
+
+  @@unique([quizId, courseProgressId, attempt])
+}
+
 model CourseProgress {
-  id                 String     @id @default(uuid())
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  enrollmentId       String     @unique
-  enrollment         Enrollment @relation(fields: [enrollmentId], references: [id])
+  id                 String        @id @default(uuid())
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  enrollmentId       String        @unique
+  enrollment         Enrollment    @relation(fields: [enrollmentId], references: [id])
   lessonsCompleted   String[]
   exercisesCompleted String[]
-  quizzesCompleted   String[]
+  quizAttempts       QuizAttempt[]
   status             Status
   currentLessonId    String?
 }
