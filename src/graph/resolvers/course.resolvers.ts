@@ -215,7 +215,20 @@ export const courseQueryResolvers: CourseResolvers = {
     const enrollments = await prisma.enrollment.findMany({
       where: { userId },
       include: {
-        course: true,
+        course: {
+          include: {
+            units: {
+              include: {
+                lessons: true,
+                quizzes: {
+                  include: {
+                    questions: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         progress: true,
       },
     });
@@ -756,6 +769,18 @@ export const courseMutationResolvers: CourseResolvers = {
       data: {
         units: { connect: units.map((unit) => ({ id: unit.id })) },
       },
+      include: {
+        units: {
+          include: {
+            lessons: true,
+            quizzes: {
+              include: {
+                questions: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return updatedCourse; // Return course
@@ -994,21 +1019,30 @@ export const courseMutationResolvers: CourseResolvers = {
 
     // Create parser
     const parser = StructuredOutputParser.fromZodSchema(
-      z
-        .object({
-          questions: z
-            .array(
-              z.object({
-                question: z.string().describe("A question for a quiz"),
-                choices: z
-                  .array(z.string())
-                  .describe("A list of choices for a question"),
-                answer: z.string().describe("The answer to the question"),
-              })
-            )
-            .describe("A list of quiz questions for a course unit"),
-        })
-        .describe("A list of quiz questions for a course unit")
+      // z
+      //   .object({
+      //     questions: z
+      //       .array(
+      //         z.object({
+      //           question: z.string().describe("A question for a quiz"),
+      //           choices: z
+      //             .array(z.string())
+      //             .describe("A list of choices for a question"),
+      //           answer: z.string().describe("The answer to the question"),
+      //         })
+      //       )
+      //       .describe("A list of quiz questions for a course unit"),
+      //   })
+      //   .describe("A list of quiz questions for a course unit")
+      z.object({
+        questions: z.array(
+          z.object({
+            question: z.string(),
+            choices: z.array(z.string()),
+            answer: z.string(),
+          })
+        ),
+      })
     );
 
     // Create parser error handling
@@ -1026,7 +1060,7 @@ export const courseMutationResolvers: CourseResolvers = {
 
     // Create promptTemplate
     const promptTemplate = new PromptTemplate({
-      template: `Generate a multiple choice quiz for a unit in a course. The unit is called "{title}", has the following description: "{description}", and covers the following topics: {topics}. Output the response with the following format: {format_instructions}.`,
+      template: `Generate a multiple choice quiz for a unit in a course in JSON format. The unit is called "{title}", has the following description: "{description}", and covers the following topics: {topics}. {format_instructions}.`,
       inputVariables: ["title", "description", "topics"],
       partialVariables: { format_instructions: formatInstructions },
     });
