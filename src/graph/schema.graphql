@@ -13,6 +13,7 @@ type UserDetails {
   interests: [String]
   learningStyle: String
   seenOnboarding: Boolean
+  nightMode: Boolean
 }
 
 type PrereqTopic {
@@ -182,6 +183,7 @@ input UpdateUserDetailsInput {
   occupation: String
   interests: [String]
   learningStyle: String
+  nightMode: Boolean
 }
 
 input UpdateCurrentLessonIdInput {

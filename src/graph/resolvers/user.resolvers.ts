@@ -129,6 +129,7 @@ export const userMutationResolvers: CourseResolvers = {
       occupation,
       interests,
       learningStyle,
+      nightMode,
     } = args.input;
 
     const userDetails = await prisma.userDetails.update({
@@ -146,6 +147,7 @@ export const userMutationResolvers: CourseResolvers = {
         occupation: occupation,
         interests: interests ? (interests as string[]) : undefined,
         learningStyle: learningStyle,
+        nightMode: Boolean(nightMode),
       },
     });
 

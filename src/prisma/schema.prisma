@@ -173,4 +173,5 @@ model UserDetails {
   interests      String[]
   learningStyle  String?
   seenOnboarding Boolean   @default(false)
+  nightMode      Boolean   @default(false)
 }

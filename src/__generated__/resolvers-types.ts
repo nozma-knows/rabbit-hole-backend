@@ -352,6 +352,7 @@ export type UpdateUserDetailsInput = {
   lastName?: InputMaybe<Scalars['String']>;
   learningStyle?: InputMaybe<Scalars['String']>;
   nickname?: InputMaybe<Scalars['String']>;
+  nightMode?: InputMaybe<Scalars['Boolean']>;
   occupation?: InputMaybe<Scalars['String']>;
   pronouns?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
@@ -367,6 +368,7 @@ export type UserDetails = {
   lastName?: Maybe<Scalars['String']>;
   learningStyle?: Maybe<Scalars['String']>;
   nickname?: Maybe<Scalars['String']>;
+  nightMode?: Maybe<Scalars['Boolean']>;
   occupation?: Maybe<Scalars['String']>;
   pronouns?: Maybe<Array<Maybe<Scalars['String']>>>;
   seenOnboarding?: Maybe<Scalars['Boolean']>;
@@ -690,6 +692,7 @@ export type UserDetailsResolvers<ContextType = Context, ParentType extends Resol
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   learningStyle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   nickname?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  nightMode?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   occupation?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   pronouns?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   seenOnboarding?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
