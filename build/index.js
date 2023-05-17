@@ -31,8 +31,15 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
         credentialsRequired: false,
     }));
     app.use((0, cors_1.default)({
-        origin: ["https://rabbit-hole-pi.vercel.app"],
+        origin: ["https://rabbit-hole-pi.vercel.app", "http://localhost:3000"],
     }));
+    app.use((_, res, next) => {
+        res.setHeader("Access-Control-Allow-Origin", "https://rabbit-hole-pi.vercel.app");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+        next();
+    });
     const httpServer = (0, http_1.createServer)(app);
     const prisma = new client_1.PrismaClient();
     const apolloServer = new apollo_server_express_1.ApolloServer({
