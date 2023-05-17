@@ -65,16 +65,18 @@ const typeDefs = readFileSync("./src/graph/schema.graphql", {
 
 const startServer = async () => {
   const app = express();
-  app.use(
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
     cors({
       origin: ["http://localhost:3000", "https://rabbit-hole-pi.vercel.app"],
-    }),
+    });
     expressjwt({
       secret: `${process.env.JWT_PRIVATE_KEY}`,
       algorithms: ["HS256"],
       credentialsRequired: false,
-    })
-  );
+    });
+  });
+
   const httpServer = createServer(app);
   const prisma = new PrismaClient();
 
