@@ -15,7 +15,7 @@ model PrereqTopic {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   prereqId    String
-  prereq      CoursePrereq @relation(fields: [prereqId], references: [id], onDelete: Cascade)
+  prereq      CoursePrereq @relation(fields: [prereqId], references: [id])
   title       String
   description String
 }
@@ -25,7 +25,7 @@ model CoursePrereq {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   courseId    String
-  course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course        @relation(fields: [courseId], references: [id])
   title       String
   description String
   topics      PrereqTopic[]
@@ -36,7 +36,7 @@ model UnitLesson {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   unitId    String
-  unit      CourseUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit      CourseUnit @relation(fields: [unitId], references: [id])
   title     String
   topics    String
   content   String
@@ -48,7 +48,7 @@ model UnitExercise {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   unitId    String
-  unit      CourseUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit      CourseUnit @relation(fields: [unitId], references: [id])
   task      String
 }
 
@@ -57,7 +57,7 @@ model QuizQuestion {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   quizId       String
-  quiz         UnitQuiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz         UnitQuiz       @relation(fields: [quizId], references: [id])
   question     String
   choices      String[]
   answer       String
@@ -69,7 +69,7 @@ model UnitQuiz {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   unitId      String
-  unit        CourseUnit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit        CourseUnit     @relation(fields: [unitId], references: [id])
   questions   QuizQuestion[]
   QuizAttempt QuizAttempt[]
 }
@@ -79,7 +79,7 @@ model CourseUnit {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   courseId    String
-  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course         @relation(fields: [courseId], references: [id])
   title       String
   description String
   lessons     UnitLesson[]
@@ -100,9 +100,9 @@ model QuizResponse {
   updatedAt     DateTime     @updatedAt
   response      String
   questionId    String
-  question      QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question      QuizQuestion @relation(fields: [questionId], references: [id])
   quizAttemptId String?
-  QuizAttempt   QuizAttempt? @relation(fields: [quizAttemptId], references: [id], onDelete: Cascade)
+  QuizAttempt   QuizAttempt? @relation(fields: [quizAttemptId], references: [id])
 }
 
 model QuizAttempt {
@@ -113,9 +113,9 @@ model QuizAttempt {
   attempt          Int
   responses        QuizResponse[]
   quizId           String
-  quiz             UnitQuiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz             UnitQuiz       @relation(fields: [quizId], references: [id])
   courseProgressId String
-  courseProgress   CourseProgress @relation(fields: [courseProgressId], references: [id], onDelete: Cascade)
+  courseProgress   CourseProgress @relation(fields: [courseProgressId], references: [id])
 
   @@unique([quizId, courseProgressId, attempt])
 }
@@ -125,7 +125,7 @@ model CourseProgress {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   enrollmentId       String        @unique
-  enrollment         Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  enrollment         Enrollment    @relation(fields: [enrollmentId], references: [id])
   lessonsCompleted   String[]
   exercisesCompleted String[]
   quizAttempts       QuizAttempt[]
@@ -139,7 +139,7 @@ model Enrollment {
   updatedAt DateTime        @updatedAt
   userId    String
   courseId  String
-  course    Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course    Course          @relation(fields: [courseId], references: [id])
   progress  CourseProgress?
 
   @@unique([userId, courseId])
