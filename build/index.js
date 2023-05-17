@@ -19,6 +19,7 @@ const fs_1 = require("fs");
 const resolvers_1 = require("./graph/resolvers");
 const express_jwt_1 = require("express-jwt");
 const client_1 = require("@prisma/client");
+const cors_1 = __importDefault(require("cors"));
 const typeDefs = (0, fs_1.readFileSync)("./src/graph/schema.graphql", {
     encoding: "utf-8",
 });
@@ -28,6 +29,9 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
         secret: `${process.env.JWT_PRIVATE_KEY}`,
         algorithms: ["HS256"],
         credentialsRequired: false,
+    }));
+    app.use((0, cors_1.default)({
+        origin: ["https://rabbit-hole-pi.vercel.app"],
     }));
     const httpServer = (0, http_1.createServer)(app);
     const prisma = new client_1.PrismaClient();

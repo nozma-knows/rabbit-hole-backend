@@ -82,7 +82,7 @@ exports.userMutationResolvers = {
             throw new Error("Missing required fields.");
         }
         // Grab args
-        const { firstName, lastName, nickname, dob, pronouns, educationLevel, occupation, interests, learningStyle, } = args.input;
+        const { firstName, lastName, nickname, dob, pronouns, educationLevel, occupation, interests, learningStyle, nightMode, } = args.input;
         const userDetails = yield prisma.userDetails.update({
             where: {
                 userId,
@@ -98,6 +98,7 @@ exports.userMutationResolvers = {
                 occupation: occupation,
                 interests: interests ? interests : undefined,
                 learningStyle: learningStyle,
+                nightMode: Boolean(nightMode),
             },
         });
         if (!userDetails) {

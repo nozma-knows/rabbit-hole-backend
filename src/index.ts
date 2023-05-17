@@ -5,6 +5,7 @@ import { readFileSync } from "fs";
 import { resolvers } from "./graph/resolvers";
 import { expressjwt } from "express-jwt";
 import { PrismaClient } from "@prisma/client";
+import cors from "cors";
 
 const typeDefs = readFileSync("./src/graph/schema.graphql", {
   encoding: "utf-8",
@@ -17,6 +18,11 @@ const startServer = async () => {
       secret: `${process.env.JWT_PRIVATE_KEY}`,
       algorithms: ["HS256"],
       credentialsRequired: false,
+    })
+  );
+  app.use(
+    cors<cors.CorsRequest>({
+      origin: ["https://rabbit-hole-pi.vercel.app", "http://localhost:3000"],
     })
   );
   const httpServer = createServer(app);
