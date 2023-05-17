@@ -13,14 +13,21 @@ const typeDefs = readFileSync("./src/graph/schema.graphql", {
 
 const startServer = async () => {
   const app = express();
+  // app.use(
+  //   expressjwt({
+  //     secret: `${process.env.JWT_PRIVATE_KEY}`,
+  //     algorithms: ["HS256"],
+  //     credentialsRequired: false,
+  //   })
+  // );
   app.use(
-    expressjwt({
-      secret: `${process.env.JWT_PRIVATE_KEY}`,
-      algorithms: ["HS256"],
-      credentialsRequired: false,
+    "/api",
+    cors<cors.CorsRequest>({
+      origin: "*",
+      credentials: true,
     })
   );
-  app.use(cors<cors.CorsRequest>());
+  // app.use(cors<cors.CorsRequest>());
 
   const httpServer = createServer(app);
 
