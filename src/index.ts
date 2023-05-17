@@ -23,7 +23,7 @@ const startServer = async () => {
   app.use(
     "/api",
     cors<cors.CorsRequest>({
-      origin: "*",
+      origin: "https://rabbit-hole-pi.vercel.app",
       credentials: true,
     })
   );
