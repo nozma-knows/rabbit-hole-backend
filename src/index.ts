@@ -20,22 +20,7 @@ const startServer = async () => {
       credentialsRequired: false,
     })
   );
-  app.use(
-    cors<cors.CorsRequest>({
-      origin: ["https://rabbit-hole-pi.vercel.app", "http://localhost:3000"],
-    })
-  );
-
-  app.use((_, res, next) => {
-    res.setHeader(
-      "Access-Control-Allow-Origin",
-      "https://rabbit-hole-pi.vercel.app"
-    );
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    next();
-  });
+  app.use(cors<cors.CorsRequest>());
 
   const httpServer = createServer(app);
 
