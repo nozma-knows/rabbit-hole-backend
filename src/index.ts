@@ -11,7 +11,6 @@ const typeDefs = readFileSync("./src/graph/schema.graphql", {
 
 const startServer = async () => {
   const app = express();
-  app.use(require("./middleware"));
   const httpServer = createServer(app);
 
   const prisma = new PrismaClient();
