@@ -24,6 +24,7 @@ const startServer = async () => {
   const prisma = new PrismaClient();
 
   const apolloServer = new ApolloServer({
+    cache: "bounded",
     typeDefs,
     resolvers,
     context: async ({ req, res }) => ({
