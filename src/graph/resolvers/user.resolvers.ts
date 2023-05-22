@@ -14,6 +14,7 @@ import {
   UpdateUserDetailsInput,
 } from "../../__generated__/resolvers-types";
 import { z } from "zod";
+const crypto = require("crypto");
 
 interface Context {
   prisma: PrismaClient;

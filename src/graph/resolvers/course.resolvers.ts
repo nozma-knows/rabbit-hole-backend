@@ -1,9 +1,7 @@
 import {
-  CourseEnrollment,
   UpdateCompletedLessonsInput,
   UpdateQuizAttemptInput,
   CreateQuizAttemptInput,
-  QuizResponse,
 } from "./../../__generated__/resolvers-types";
 import { PrismaClient } from "@prisma/client";
 import {
@@ -24,6 +22,8 @@ import { z } from "zod";
 const { OpenAI, PromptTemplate } = require("langchain");
 const { StructuredOutputParser } = require("langchain/output_parsers");
 const crypto = require("crypto");
+import { generatePrereqsQueue, generateUnitsQueue } from "../../utils/queues";
+import { chatGPT } from "../../utils/openai/models";
 
 interface Context {
   prisma: PrismaClient;
@@ -349,8 +349,222 @@ export const courseMutationResolvers: CourseResolvers = {
     return course;
   },
 
-  // Generate prereqs mutation resolver
-  generatePrereqs: async (
+  // // Generate prereqs mutation resolver
+  // generatePrereqs: async (
+  //   _parent: any,
+  //   args: { id: string },
+  //   contextValue: Context
+  // ) => {
+  //   // Grab prisma client
+  //   const { prisma } = contextValue;
+
+  //   // Grab prisma client error handling
+  //   if (!prisma) {
+  //     throw new Error("Failed to find prisma client.");
+  //   }
+
+  //   // Grab args
+  //   const { id: courseId } = args;
+
+  //   // Grab args error handling
+  //   if (!courseId) {
+  //     throw new Error("Missing required fields.");
+  //   }
+
+  //   // Grab course
+  //   const course = await prisma.course.findUnique({
+  //     where: {
+  //       id: courseId,
+  //     },
+  //   });
+
+  //   // Grab course error handling
+  //   if (!course) {
+  //     throw new Error("Failed to find course.");
+  //   }
+
+  //   // Destructure course
+  //   const { title, description } = course;
+
+  //   // Destructure course error handling
+  //   if (!title || !description) {
+  //     throw new Error("Course is missing required fields.");
+  //   }
+
+  //   // Create model
+  //   const model = new OpenAI({
+  //     openAIApiKey: process.env.OPENAI_API_KEY,
+  //     temperature: 0,
+  //     modelName: "gpt-3.5-turbo",
+  //   });
+
+  //   // Create model error handling
+  //   if (!model) {
+  //     throw new Error("Failed to create model");
+  //   }
+
+  //   // // Create parser
+  //   // const parser = StructuredOutputParser.fromZodSchema(
+  //   //   z
+  //   //     .array(
+  //   //       z.object({
+  //   //         title: z.string().describe("Title for the prerequisite"),
+  //   //         description: z
+  //   //           .string()
+  //   //           .describe("Two sentence description for the course prerequisite"),
+  //   //         topics: z
+  //   //           .array(
+  //   //             z.object({
+  //   //               title: z
+  //   //                 .string()
+  //   //                 .describe("Title for the prerequisite topic"),
+  //   //               description: z
+  //   //                 .string()
+  //   //                 .describe(
+  //   //                   "Two sentence description for the prerequisite topic"
+  //   //                 ),
+  //   //             })
+  //   //           )
+  //   //           .describe("List of prerequisite topics"),
+  //   //       })
+  //   //     )
+  //   //     .describe("List of prerequisites")
+  //   // );
+
+  //   // // Create parser error handling
+  //   // if (!parser) {
+  //   //   throw new Error("Failed to create parser");
+  //   // }
+
+  //   // // Create formatInstructions
+  //   // const formatInstructions = parser.getFormatInstructions();
+
+  //   // // Create formatInstructions error handling
+  //   // if (!formatInstructions) {
+  //   //   throw new Error("Failed to create formatInstructions");
+  //   // }
+
+  //   // console.log("format instructions: ", formatInstructions);
+
+  //   // Create promptTemplate
+  //   // const promptTemplate = new PromptTemplate({
+  //   //   template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". {format_instructions}. Limit the number of prerequisites to the top 3.`,
+  //   //   inputVariables: ["title", "description"],
+  //   //   partialVariables: { format_instructions: formatInstructions },
+  //   // });
+
+  //   // const promptTemplate = new PromptTemplate({
+  //   //   template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". {format_instructions}. Limit the number of prerequisites to the top 3.`,
+  //   //   inputVariables: ["title", "description"],
+  //   // });
+  //   const promptTemplate = new PromptTemplate({
+  //     template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". Limit the number of prerequisites to the top 3. Output should be in JSON format. Each prerequisite should have a title, description, and list of topics. Each topic should have a title and description.`,
+  //     inputVariables: ["title", "description"],
+  //   });
+
+  //   // Create promptTemplate error handling
+  //   if (!promptTemplate) {
+  //     throw new Error("Failed to create promptTemplate");
+  //   }
+
+  //   // Create prompt
+  //   const prompt = await promptTemplate.format({ title, description });
+
+  //   // Create prompt error handling
+  //   if (!prompt) {
+  //     throw new Error("Failed to create prompt");
+  //   }
+
+  //   // Query openai
+  //   const result = await model.call(prompt);
+
+  //   // Query openai error handling
+  //   if (!result) {
+  //     throw new Error("Failed to call openai");
+  //   }
+
+  //   const parsedResult = JSON.parse(result).prerequisites;
+
+  //   // Parse result
+  //   // const parsedResult = await parser.parse(result);
+  //   // const parsedResult: any = [];
+
+  //   // Parse result error handling
+  //   // if (!parsedResult) {
+  //   //   console.log("parsedResult is null");
+  //   //   throw new Error("Failed to parse result");
+  //   // }
+
+  //   // console.log("parsedResult: ", parsedResult);
+
+  //   // Create course prereqs
+  //   const prereqs: any[] = [];
+  //   await prisma.coursePrereq.createMany({
+  //     data: parsedResult.map((p: CoursePrereq) => {
+  //       const prereqId = crypto.randomUUID();
+  //       const prereq = {
+  //         id: prereqId,
+  //         courseId: courseId,
+  //         title: p.title,
+  //         description: p.description,
+  //         topics: p.topics,
+  //       };
+  //       prereqs.push(prereq);
+  //       return {
+  //         id: prereqId,
+  //         courseId: courseId,
+  //         title: p.title,
+  //         description: p.description,
+  //       };
+  //     }),
+  //   });
+
+  //   // Create course prereqs error handling
+  //   if (!prereqs) {
+  //     throw new Error("Failed to create course prereqs");
+  //   }
+
+  //   // Create course prereq topics and update prereqs with topics
+  //   prereqs.map(async (prereq: CoursePrereq) => {
+  //     const topicIds: string[] = [];
+  //     await prisma.prereqTopic.createMany({
+  //       data: prereq.topics.map((topic: Maybe<PrereqTopic>) => {
+  //         const topicId = crypto.randomUUID();
+  //         topicIds.push(topicId);
+  //         return {
+  //           id: topicId,
+  //           prereqId: prereq.id,
+  //           title: topic ? topic.title : "",
+  //           description: topic ? topic.description : "",
+  //         };
+  //       }),
+  //     });
+  //     await prisma.coursePrereq.update({
+  //       where: {
+  //         id: prereq.id,
+  //       },
+  //       data: {
+  //         topics: {
+  //           connect: topicIds.map((id: string) => ({ id })),
+  //         },
+  //       },
+  //     });
+  //   });
+
+  //   // Update course with prereqs and units
+  //   const updatedCourse = await prisma.course.update({
+  //     where: {
+  //       id: courseId,
+  //     },
+  //     data: {
+  //       prereqs: { connect: prereqs.map((prereq) => ({ id: prereq.id })) },
+  //     },
+  //   });
+
+  //   return updatedCourse; // Return course
+  // },
+
+  createGeneratePrereqsJob: async (
     _parent: any,
     args: { id: string },
     contextValue: Context
@@ -383,6 +597,52 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Failed to find course.");
     }
 
+    try {
+      await generatePrereqsQueue.add({
+        courseId: args.id,
+      });
+
+      return course;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to generate prereqs");
+    }
+  },
+
+  generatePrereqs: async (
+    _parent: any,
+    args: { id: string },
+    contextValue: Context
+  ) => {
+    console.log("contextValue: ", contextValue);
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client - generatePrereqs");
+    }
+
+    // Grab args
+    const { id: courseId } = args;
+
+    // Grab args error handling
+    if (!courseId) {
+      throw new Error("Missing required fields.");
+    }
+
+    // Grab course
+    const course = await prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+    });
+
+    // Grab course error handling
+    if (!course) {
+      throw new Error("Failed to find course.");
+    }
+
     // Destructure course
     const { title, description } = course;
 
@@ -392,71 +652,13 @@ export const courseMutationResolvers: CourseResolvers = {
     }
 
     // Create model
-    const model = new OpenAI({
-      openAIApiKey: process.env.OPENAI_API_KEY,
-      temperature: 0,
-      modelName: "gpt-3.5-turbo",
-    });
+    const model = chatGPT();
 
     // Create model error handling
     if (!model) {
       throw new Error("Failed to create model");
     }
 
-    // // Create parser
-    // const parser = StructuredOutputParser.fromZodSchema(
-    //   z
-    //     .array(
-    //       z.object({
-    //         title: z.string().describe("Title for the prerequisite"),
-    //         description: z
-    //           .string()
-    //           .describe("Two sentence description for the course prerequisite"),
-    //         topics: z
-    //           .array(
-    //             z.object({
-    //               title: z
-    //                 .string()
-    //                 .describe("Title for the prerequisite topic"),
-    //               description: z
-    //                 .string()
-    //                 .describe(
-    //                   "Two sentence description for the prerequisite topic"
-    //                 ),
-    //             })
-    //           )
-    //           .describe("List of prerequisite topics"),
-    //       })
-    //     )
-    //     .describe("List of prerequisites")
-    // );
-
-    // // Create parser error handling
-    // if (!parser) {
-    //   throw new Error("Failed to create parser");
-    // }
-
-    // // Create formatInstructions
-    // const formatInstructions = parser.getFormatInstructions();
-
-    // // Create formatInstructions error handling
-    // if (!formatInstructions) {
-    //   throw new Error("Failed to create formatInstructions");
-    // }
-
-    // console.log("format instructions: ", formatInstructions);
-
-    // Create promptTemplate
-    // const promptTemplate = new PromptTemplate({
-    //   template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". {format_instructions}. Limit the number of prerequisites to the top 3.`,
-    //   inputVariables: ["title", "description"],
-    //   partialVariables: { format_instructions: formatInstructions },
-    // });
-
-    // const promptTemplate = new PromptTemplate({
-    //   template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". {format_instructions}. Limit the number of prerequisites to the top 3.`,
-    //   inputVariables: ["title", "description"],
-    // });
     const promptTemplate = new PromptTemplate({
       template: `What are the most important prerequisites for a course called "{title}" which has the following description: "{description}". Limit the number of prerequisites to the top 3. Output should be in JSON format. Each prerequisite should have a title, description, and list of topics. Each topic should have a title and description.`,
       inputVariables: ["title", "description"],
@@ -483,19 +685,13 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Failed to call openai");
     }
 
+    // Parse result
     const parsedResult = JSON.parse(result).prerequisites;
 
-    // Parse result
-    // const parsedResult = await parser.parse(result);
-    // const parsedResult: any = [];
-
     // Parse result error handling
-    // if (!parsedResult) {
-    //   console.log("parsedResult is null");
-    //   throw new Error("Failed to parse result");
-    // }
-
-    // console.log("parsedResult: ", parsedResult);
+    if (!parsedResult) {
+      throw new Error("Failed to parse result");
+    }
 
     // Create course prereqs
     const prereqs: any[] = [];
@@ -561,10 +757,236 @@ export const courseMutationResolvers: CourseResolvers = {
       },
     });
 
-    return updatedCourse; // Return course
+    // Update course error handling
+    if (!updatedCourse) {
+      throw new Error("Failed to update course");
+    }
+
+    return updatedCourse;
   },
 
   // Generate prereqs mutation resolver
+  // generateUnits: async (
+  //   _parent: any,
+  //   args: { id: string },
+  //   contextValue: Context
+  // ) => {
+  //   // Grab prisma client
+  //   const { prisma } = contextValue;
+
+  //   // Grab prisma client error handling
+  //   if (!prisma) {
+  //     throw new Error("Failed to find prisma client.");
+  //   }
+
+  //   // Grab args
+  //   const { id: courseId } = args;
+
+  //   // Grab args error handling
+  //   if (!courseId) {
+  //     throw new Error("Missing required fields.");
+  //   }
+
+  //   // Grab course
+  //   const course = await prisma.course.findUnique({
+  //     where: {
+  //       id: courseId,
+  //     },
+  //   });
+
+  //   // Grab course error handling
+  //   if (!course) {
+  //     throw new Error("Failed to find course.");
+  //   }
+
+  //   // Destructure course
+  //   const { title, description } = course;
+
+  //   // Destructure course error handling
+  //   if (!title || !description) {
+  //     throw new Error("Course is missing required fields.");
+  //   }
+
+  //   // Create model
+  //   const model = new OpenAI({
+  //     openAIApiKey: process.env.OPENAI_API_KEY,
+  //     temperature: 0,
+  //     modelName: "gpt-3.5-turbo",
+  //   });
+
+  //   // Create model error handling
+  //   if (!model) {
+  //     throw new Error("Failed to create model");
+  //   }
+
+  //   // // Create parser
+  //   // const parser = StructuredOutputParser.fromZodSchema(
+  //   //   z
+  //   //     .array(
+  //   //       z.object({
+  //   //         title: z.string().describe("Title of a course unit"),
+  //   //         description: z.string().describe("Description of a course unit"),
+  //   //         lessons: z
+  //   //           .array(
+  //   //             z
+  //   //               .object({
+  //   //                 title: z
+  //   //                   .string()
+  //   //                   .describe("Title of a course unit's lesson"),
+  //   //                 topics: z
+  //   //                   .array(
+  //   //                     z
+  //   //                       .string()
+  //   //                       .describe("Topic covered in a course unit's lesson")
+  //   //                   )
+  //   //                   .describe("Topics covered in a course unit's lesson"),
+  //   //               })
+  //   //               .describe("Lesson covered in a course unit")
+  //   //           )
+  //   //           .describe("Lessons covered in a course unit"),
+  //   //       })
+  //   //     )
+  //   //     .describe("Units of a course")
+  //   // );
+
+  //   // // Create parser error handling
+  //   // if (!parser) {
+  //   //   throw new Error("Failed to create parser");
+  //   // }
+
+  //   // // Create formatInstructions
+  //   // const formatInstructions = parser.getFormatInstructions();
+
+  //   // // Create formatInstructions error handling
+  //   // if (!formatInstructions) {
+  //   //   throw new Error("Failed to create formatInstructions");
+  //   // }
+
+  //   // // Create promptTemplate
+  //   // const promptTemplate = new PromptTemplate({
+  //   //   template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Output the response with the following format: {format_instructions}. Each unit should contain a minimum of 3 lessons.`,
+  //   //   inputVariables: ["title", "description"],
+  //   //   partialVariables: { format_instructions: formatInstructions },
+  //   // });
+
+  //   // Create promptTemplate
+  //   const promptTemplate = new PromptTemplate({
+  //     template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Each unit should contain a minimum of 3 lessons. Output should be an object with a key of units and value that is an array of units. Output should be in JSON format. Each unit should include a title, description, and a list of lessons. Each lesson should include a title and a list of topics. Each topic should be a string.`,
+  //     inputVariables: ["title", "description"],
+  //   });
+
+  //   // Create promptTemplate error handling
+  //   if (!promptTemplate) {
+  //     throw new Error("Failed to create promptTemplate");
+  //   }
+
+  //   // Create prompt
+  //   const prompt = await promptTemplate.format({ title, description });
+
+  //   // Create prompt error handling
+  //   if (!prompt) {
+  //     throw new Error("Failed to create prompt");
+  //   }
+
+  //   // Query openai
+  //   const result = await model.call(prompt);
+
+  //   // Query openai error handling
+  //   if (!result) {
+  //     throw new Error("Failed to call openai");
+  //   }
+  //   const parsedResult = JSON.parse(result).units;
+  //   // Parse result
+  //   // const parsedResult = await parser.parse(result);
+
+  //   // Parse result error handling
+  //   if (!parsedResult) {
+  //     throw new Error("Failed to parse result");
+  //   }
+
+  //   // Create course prereqs
+  //   const units: any[] = [];
+  //   await prisma.courseUnit.createMany({
+  //     data: parsedResult.map((u: CourseUnit, index: number) => {
+  //       const unitId = crypto.randomUUID();
+  //       const unit = {
+  //         id: unitId,
+  //         courseId: courseId,
+  //         title: u.title,
+  //         description: u.description,
+  //         lessons: u.lessons,
+  //         order: index + 1,
+  //       };
+  //       units.push(unit);
+  //       return {
+  //         id: unitId,
+  //         courseId: courseId,
+  //         title: u.title,
+  //         description: u.description,
+  //         order: index + 1,
+  //       };
+  //     }),
+  //   });
+
+  //   // Create course prereqs error handling
+  //   if (!units) {
+  //     throw new Error("Failed to create course prereqs");
+  //   }
+
+  //   // Create course prereq topics and update prereqs with topics
+  //   units.map(async (unit: CourseUnit) => {
+  //     const lessonIds: string[] = [];
+  //     await prisma.unitLesson.createMany({
+  //       data: unit.lessons.map((lesson: Maybe<UnitLesson>, index: number) => {
+  //         const lessonId = crypto.randomUUID();
+  //         lessonIds.push(lessonId);
+  //         return {
+  //           id: lessonId,
+  //           unitId: unit.id,
+  //           title: lesson ? lesson.title : "",
+  //           topics: lesson ? lesson.topics.toString() : "",
+  //           content: "",
+  //           order: index + 1,
+  //         };
+  //       }),
+  //     });
+  //     await prisma.courseUnit.update({
+  //       where: {
+  //         id: unit.id,
+  //       },
+  //       data: {
+  //         lessons: {
+  //           connect: lessonIds.map((id: string) => ({ id })),
+  //         },
+  //       },
+  //     });
+  //   });
+
+  //   // Update course with units
+  //   const updatedCourse = await prisma.course.update({
+  //     where: {
+  //       id: courseId,
+  //     },
+  //     data: {
+  //       units: { connect: units.map((unit) => ({ id: unit.id })) },
+  //     },
+  //     include: {
+  //       units: {
+  //         include: {
+  //           lessons: true,
+  //           quizzes: {
+  //             include: {
+  //               questions: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   return updatedCourse; // Return course
+  // },
+
   generateUnits: async (
     _parent: any,
     args: { id: string },
@@ -598,192 +1020,16 @@ export const courseMutationResolvers: CourseResolvers = {
       throw new Error("Failed to find course.");
     }
 
-    // Destructure course
-    const { title, description } = course;
-
-    // Destructure course error handling
-    if (!title || !description) {
-      throw new Error("Course is missing required fields.");
-    }
-
-    // Create model
-    const model = new OpenAI({
-      openAIApiKey: process.env.OPENAI_API_KEY,
-      temperature: 0,
-      modelName: "gpt-3.5-turbo",
-    });
-
-    // Create model error handling
-    if (!model) {
-      throw new Error("Failed to create model");
-    }
-
-    // // Create parser
-    // const parser = StructuredOutputParser.fromZodSchema(
-    //   z
-    //     .array(
-    //       z.object({
-    //         title: z.string().describe("Title of a course unit"),
-    //         description: z.string().describe("Description of a course unit"),
-    //         lessons: z
-    //           .array(
-    //             z
-    //               .object({
-    //                 title: z
-    //                   .string()
-    //                   .describe("Title of a course unit's lesson"),
-    //                 topics: z
-    //                   .array(
-    //                     z
-    //                       .string()
-    //                       .describe("Topic covered in a course unit's lesson")
-    //                   )
-    //                   .describe("Topics covered in a course unit's lesson"),
-    //               })
-    //               .describe("Lesson covered in a course unit")
-    //           )
-    //           .describe("Lessons covered in a course unit"),
-    //       })
-    //     )
-    //     .describe("Units of a course")
-    // );
-
-    // // Create parser error handling
-    // if (!parser) {
-    //   throw new Error("Failed to create parser");
-    // }
-
-    // // Create formatInstructions
-    // const formatInstructions = parser.getFormatInstructions();
-
-    // // Create formatInstructions error handling
-    // if (!formatInstructions) {
-    //   throw new Error("Failed to create formatInstructions");
-    // }
-
-    // // Create promptTemplate
-    // const promptTemplate = new PromptTemplate({
-    //   template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Output the response with the following format: {format_instructions}. Each unit should contain a minimum of 3 lessons.`,
-    //   inputVariables: ["title", "description"],
-    //   partialVariables: { format_instructions: formatInstructions },
-    // });
-
-    // Create promptTemplate
-    const promptTemplate = new PromptTemplate({
-      template: `What are the most important units to cover for a course called "{title}" which has the following description: "{description}". Each unit should contain a minimum of 3 lessons. Output should be an object with a key of units and value that is an array of units. Output should be in JSON format. Each unit should include a title, description, and a list of lessons. Each lesson should include a title and a list of topics. Each topic should be a string.`,
-      inputVariables: ["title", "description"],
-    });
-
-    // Create promptTemplate error handling
-    if (!promptTemplate) {
-      throw new Error("Failed to create promptTemplate");
-    }
-
-    // Create prompt
-    const prompt = await promptTemplate.format({ title, description });
-
-    // Create prompt error handling
-    if (!prompt) {
-      throw new Error("Failed to create prompt");
-    }
-
-    // Query openai
-    const result = await model.call(prompt);
-
-    // Query openai error handling
-    if (!result) {
-      throw new Error("Failed to call openai");
-    }
-    const parsedResult = JSON.parse(result).units;
-    // Parse result
-    // const parsedResult = await parser.parse(result);
-
-    // Parse result error handling
-    if (!parsedResult) {
-      throw new Error("Failed to parse result");
-    }
-
-    // Create course prereqs
-    const units: any[] = [];
-    await prisma.courseUnit.createMany({
-      data: parsedResult.map((u: CourseUnit, index: number) => {
-        const unitId = crypto.randomUUID();
-        const unit = {
-          id: unitId,
-          courseId: courseId,
-          title: u.title,
-          description: u.description,
-          lessons: u.lessons,
-          order: index + 1,
-        };
-        units.push(unit);
-        return {
-          id: unitId,
-          courseId: courseId,
-          title: u.title,
-          description: u.description,
-          order: index + 1,
-        };
-      }),
-    });
-
-    // Create course prereqs error handling
-    if (!units) {
-      throw new Error("Failed to create course prereqs");
-    }
-
-    // Create course prereq topics and update prereqs with topics
-    units.map(async (unit: CourseUnit) => {
-      const lessonIds: string[] = [];
-      await prisma.unitLesson.createMany({
-        data: unit.lessons.map((lesson: Maybe<UnitLesson>, index: number) => {
-          const lessonId = crypto.randomUUID();
-          lessonIds.push(lessonId);
-          return {
-            id: lessonId,
-            unitId: unit.id,
-            title: lesson ? lesson.title : "",
-            topics: lesson ? lesson.topics.toString() : "",
-            content: "",
-            order: index + 1,
-          };
-        }),
+    try {
+      await generateUnitsQueue.add({
+        courseId: args.id,
       });
-      await prisma.courseUnit.update({
-        where: {
-          id: unit.id,
-        },
-        data: {
-          lessons: {
-            connect: lessonIds.map((id: string) => ({ id })),
-          },
-        },
-      });
-    });
 
-    // Update course with units
-    const updatedCourse = await prisma.course.update({
-      where: {
-        id: courseId,
-      },
-      data: {
-        units: { connect: units.map((unit) => ({ id: unit.id })) },
-      },
-      include: {
-        units: {
-          include: {
-            lessons: true,
-            quizzes: {
-              include: {
-                questions: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return updatedCourse; // Return course
+      return course;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to generate prereqs");
+    }
   },
 
   // Generate exercises mutation resolver

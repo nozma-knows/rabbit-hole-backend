@@ -1,50 +1,56 @@
-import { createServer } from "http";
+// Prisma
+// Bull
+// Redis
+
+const ApolloServer = require("@apollo/server");
+const expressMiddleware = require("@apollo/server/express4");
+import cors from "cors";
 import express from "express";
-import { ApolloServer } from "apollo-server-express";
+import { PrismaClient } from "@prisma/client";
 import { readFileSync } from "fs";
 import { resolvers } from "./graph/resolvers";
-import { expressjwt } from "express-jwt";
-import { PrismaClient } from "@prisma/client";
+import bodyParser from "body-parser";
+import { createServer } from "http";
+
+const app = express();
 
 const typeDefs = readFileSync("./src/graph/schema.graphql", {
   encoding: "utf-8",
 });
 
 const startServer = async () => {
-  const app = express();
-  app.use(
-    expressjwt({
-      secret: `${process.env.JWT_PRIVATE_KEY}`,
-      algorithms: ["HS256"],
-      credentialsRequired: false,
-    })
-  );
-  const httpServer = createServer(app);
-
   const prisma = new PrismaClient();
 
-  const apolloServer = new ApolloServer({
-    cache: "bounded",
+  const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({ req, res }) => ({
+    context: async () => ({
       prisma, // prisma client
-      userId: req.headers.userId, // user id from token
-      expiry: req.headers.expiry, // expiry from token
-      token: req.headers.authorization?.split("Bearer ")[1], // token
     }),
   });
 
-  await apolloServer.start();
+  await server.start();
 
-  apolloServer.applyMiddleware({
-    app,
-    path: "/api",
-  });
+  const httpServer = createServer(app);
 
-  httpServer.listen({ port: process.env.PORT || 4000 }, () =>
-    console.log(`Server listening on localhost:4000${apolloServer.graphqlPath}`)
+  // Set up our Express middleware to handle CORS, body parsing,
+  // and our expressMiddleware function.
+  app.use(
+    "/",
+    cors<cors.CorsRequest>(),
+    bodyParser.json(),
+    // expressMiddleware accepts the same arguments:
+    // an Apollo Server instance and optional configuration options
+    expressMiddleware(server, {
+      context: async () => ({ prisma }),
+    })
   );
+
+  // Modified server startup
+  await new Promise<void>((resolve) =>
+    httpServer.listen({ port: 4000 }, resolve)
+  );
+  console.log(`🚀 Server ready at http://localhost:4000/`);
 };
 
 startServer();

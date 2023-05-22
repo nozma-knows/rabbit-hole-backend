@@ -107,6 +107,7 @@ export type GenerateLessonInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createCourse: Course;
+  createGeneratePrereqsJob: Course;
   createQuizAttempt: QuizAttempt;
   createUserDetails: UserDetails;
   deleteCourse: Course;
@@ -126,6 +127,11 @@ export type Mutation = {
 
 export type MutationCreateCourseArgs = {
   input: CreateCourseInput;
+};
+
+
+export type MutationCreateGeneratePrereqsJobArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -292,6 +298,11 @@ export enum Status {
   InProgress = 'IN_PROGRESS',
   Pending = 'PENDING'
 }
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  prereqsGenerated: Course;
+};
 
 export type UnitExercise = {
   __typename?: 'UnitExercise';
@@ -467,6 +478,7 @@ export type ResolversTypes = ResolversObject<{
   QuizResponse: ResolverTypeWrapper<QuizResponse>;
   Status: Status;
   String: ResolverTypeWrapper<Scalars['String']>;
+  Subscription: ResolverTypeWrapper<{}>;
   UnitExercise: ResolverTypeWrapper<UnitExercise>;
   UnitLesson: ResolverTypeWrapper<UnitLesson>;
   UnitQuiz: ResolverTypeWrapper<UnitQuiz>;
@@ -497,6 +509,7 @@ export type ResolversParentTypes = ResolversObject<{
   QuizQuestion: QuizQuestion;
   QuizResponse: QuizResponse;
   String: Scalars['String'];
+  Subscription: {};
   UnitExercise: UnitExercise;
   UnitLesson: UnitLesson;
   UnitQuiz: UnitQuiz;
@@ -575,6 +588,7 @@ export type CourseUnitResolvers<ContextType = Context, ParentType extends Resolv
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createCourse?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreateCourseArgs, 'input'>>;
+  createGeneratePrereqsJob?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreateGeneratePrereqsJobArgs, 'id'>>;
   createQuizAttempt?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, Partial<MutationCreateQuizAttemptArgs>>;
   createUserDetails?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType, RequireFields<MutationCreateUserDetailsArgs, 'userId'>>;
   deleteCourse?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationDeleteCourseArgs, 'id'>>;
@@ -649,6 +663,10 @@ export type QuizResponseResolvers<ContextType = Context, ParentType extends Reso
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type SubscriptionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = ResolversObject<{
+  prereqsGenerated?: SubscriptionResolver<ResolversTypes['Course'], "prereqsGenerated", ParentType, ContextType>;
+}>;
+
 export type UnitExerciseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['UnitExercise'] = ResolversParentTypes['UnitExercise']> = ResolversObject<{
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -713,6 +731,7 @@ export type Resolvers<ContextType = Context> = ResolversObject<{
   QuizAttempt?: QuizAttemptResolvers<ContextType>;
   QuizQuestion?: QuizQuestionResolvers<ContextType>;
   QuizResponse?: QuizResponseResolvers<ContextType>;
+  Subscription?: SubscriptionResolvers<ContextType>;
   UnitExercise?: UnitExerciseResolvers<ContextType>;
   UnitLesson?: UnitLessonResolvers<ContextType>;
   UnitQuiz?: UnitQuizResolvers<ContextType>;

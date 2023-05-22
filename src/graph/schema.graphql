@@ -224,6 +224,7 @@ type Query {
 type Mutation {
   createCourse(input: CreateCourseInput!): Course!
   deleteCourse(id: String!): Course!
+  createGeneratePrereqsJob(id: String!): Course!
   generatePrereqs(id: String!): Course!
   generateUnits(id: String!): Course!
   generateExercises(id: String!): [UnitExercise]!
@@ -240,4 +241,9 @@ type Mutation {
   createQuizAttempt(input: CreateQuizAttemptInput): QuizAttempt!
   updateQuizAttempt(id: String!, input: UpdateQuizAttemptInput): QuizAttempt!
   updateQuizAttemptStatus(id: String!, status: Status): QuizAttempt!
+}
+
+type Subscription {
+  prereqsGenerated: [CoursePrereq]!
+  unitsGenerated: [CourseUnit]!
 }
