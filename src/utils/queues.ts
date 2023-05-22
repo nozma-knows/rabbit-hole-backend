@@ -9,9 +9,12 @@ import {
   UnitLesson,
 } from "../__generated__/resolvers-types";
 const { PromptTemplate } = require("langchain");
+export const prereqsQueue = new Queue(
+  "prereqs",
+  process.env.REDIS_URL as string
+); // Specify Redis connection using object
 
-export const prereqsQueue = new Queue("prereqs");
-export const unitsQueue = new Queue("units");
+export const unitsQueue = new Queue("units", process.env.REDIS_URL as string);
 
 // Process for generating prereqs for all jobs in prereqs queue
 prereqsQueue.process(async (job, done) => {
