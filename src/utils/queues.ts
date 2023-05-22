@@ -13,7 +13,8 @@ let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 const { PromptTemplate } = require("langchain");
 
-export const prereqsQueue = new Queue("prereqs", REDIS_URL); // Specify Redis connection using object
+const settings = { lockDuration: 60000 };
+export const prereqsQueue = new Queue("prereqs", REDIS_URL, { settings }); // Specify Redis connection using object
 
 export const unitsQueue = new Queue("units", REDIS_URL);
 
