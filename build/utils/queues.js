@@ -17,8 +17,8 @@ const bull_1 = __importDefault(require("bull"));
 const index_1 = require("../index");
 const models_1 = require("./openai/models");
 const { PromptTemplate } = require("langchain");
-exports.prereqsQueue = new bull_1.default("prereqs");
-exports.unitsQueue = new bull_1.default("units");
+exports.prereqsQueue = new bull_1.default("prereqs", process.env.REDIS_URL); // Specify Redis connection using object
+exports.unitsQueue = new bull_1.default("units", process.env.REDIS_URL);
 // Process for generating prereqs for all jobs in prereqs queue
 exports.prereqsQueue.process((job, done) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("In prereqsQueue process: ", job.id);
