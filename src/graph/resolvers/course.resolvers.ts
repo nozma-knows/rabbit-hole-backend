@@ -218,6 +218,11 @@ export const courseQueryResolvers: CourseResolvers = {
       include: {
         course: {
           include: {
+            prereqs: {
+              include: {
+                topics: true,
+              },
+            },
             units: {
               include: {
                 lessons: true,
@@ -1636,6 +1641,8 @@ export const courseMutationResolvers: CourseResolvers = {
     if (!lesson) {
       throw new Error("Failed to update lesson with content");
     }
+
+    console.log("lesson: ", lesson);
 
     return lesson;
   },
