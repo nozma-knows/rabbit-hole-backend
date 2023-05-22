@@ -107,7 +107,9 @@ export type GenerateLessonInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createCourse: Course;
+  createPrereqsJob: Course;
   createQuizAttempt: QuizAttempt;
+  createUnitsJob: Course;
   createUserDetails: UserDetails;
   deleteCourse: Course;
   generateExercises: Array<Maybe<UnitExercise>>;
@@ -129,8 +131,18 @@ export type MutationCreateCourseArgs = {
 };
 
 
+export type MutationCreatePrereqsJobArgs = {
+  id: Scalars['String'];
+};
+
+
 export type MutationCreateQuizAttemptArgs = {
   input?: InputMaybe<CreateQuizAttemptInput>;
+};
+
+
+export type MutationCreateUnitsJobArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -575,7 +587,9 @@ export type CourseUnitResolvers<ContextType = Context, ParentType extends Resolv
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createCourse?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreateCourseArgs, 'input'>>;
+  createPrereqsJob?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreatePrereqsJobArgs, 'id'>>;
   createQuizAttempt?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, Partial<MutationCreateQuizAttemptArgs>>;
+  createUnitsJob?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreateUnitsJobArgs, 'id'>>;
   createUserDetails?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType, RequireFields<MutationCreateUserDetailsArgs, 'userId'>>;
   deleteCourse?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationDeleteCourseArgs, 'id'>>;
   generateExercises?: Resolver<Array<Maybe<ResolversTypes['UnitExercise']>>, ParentType, ContextType, RequireFields<MutationGenerateExercisesArgs, 'id'>>;
