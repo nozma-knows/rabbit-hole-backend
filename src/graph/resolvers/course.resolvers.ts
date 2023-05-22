@@ -24,6 +24,7 @@ import { z } from "zod";
 const { OpenAI, PromptTemplate } = require("langchain");
 const { StructuredOutputParser } = require("langchain/output_parsers");
 const crypto = require("crypto");
+import { prereqsQueue, unitsQueue } from "../../utils/queues";
 
 interface Context {
   prisma: PrismaClient;
@@ -349,6 +350,52 @@ export const courseMutationResolvers: CourseResolvers = {
     return course;
   },
 
+  // Create Job for generating prereqs
+  createPrereqsJob: async (
+    _parent: any,
+    args: { id: string },
+    contextValue: Context
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { id: courseId } = args;
+
+    // Grab args error handling
+    if (!courseId) {
+      throw new Error("Missing required fields.");
+    }
+
+    // Grab course
+    const course = await prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+    });
+
+    // Grab course error handling
+    if (!course) {
+      throw new Error("Failed to find course.");
+    }
+
+    try {
+      await prereqsQueue.add({
+        courseId: args.id,
+      });
+
+      return course;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to create prereqs job.");
+    }
+  },
+
   // Generate prereqs mutation resolver
   generatePrereqs: async (
     _parent: any,
@@ -562,6 +609,52 @@ export const courseMutationResolvers: CourseResolvers = {
     });
 
     return updatedCourse; // Return course
+  },
+
+  // Create Job for generating units
+  createUnitsJob: async (
+    _parent: any,
+    args: { id: string },
+    contextValue: Context
+  ) => {
+    // Grab prisma client
+    const { prisma } = contextValue;
+
+    // Grab prisma client error handling
+    if (!prisma) {
+      throw new Error("Failed to find prisma client.");
+    }
+
+    // Grab args
+    const { id: courseId } = args;
+
+    // Grab args error handling
+    if (!courseId) {
+      throw new Error("Missing required fields.");
+    }
+
+    // Grab course
+    const course = await prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+    });
+
+    // Grab course error handling
+    if (!course) {
+      throw new Error("Failed to find course.");
+    }
+
+    try {
+      await unitsQueue.add({
+        courseId: args.id,
+      });
+
+      return course;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to create units job.");
+    }
   },
 
   // Generate prereqs mutation resolver
