@@ -15,6 +15,7 @@ const zod_1 = require("zod");
 const { OpenAI, PromptTemplate } = require("langchain");
 const { StructuredOutputParser } = require("langchain/output_parsers");
 const crypto = require("crypto");
+const queues_1 = require("../../utils/queues");
 exports.courseQueryResolvers = {
     // Course query resolver
     course: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
@@ -166,6 +167,11 @@ exports.courseQueryResolvers = {
             include: {
                 course: {
                     include: {
+                        prereqs: {
+                            include: {
+                                topics: true,
+                            },
+                        },
                         units: {
                             include: {
                                 lessons: true,
@@ -269,6 +275,41 @@ exports.courseMutationResolvers = {
             throw new Error("Failed to delete course");
         }
         return course;
+    }),
+    // Create Job for generating prereqs
+    createPrereqsJob: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
+        // Grab prisma client
+        const { prisma } = contextValue;
+        // Grab prisma client error handling
+        if (!prisma) {
+            throw new Error("Failed to find prisma client.");
+        }
+        // Grab args
+        const { id: courseId } = args;
+        // Grab args error handling
+        if (!courseId) {
+            throw new Error("Missing required fields.");
+        }
+        // Grab course
+        const course = yield prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+        });
+        // Grab course error handling
+        if (!course) {
+            throw new Error("Failed to find course.");
+        }
+        try {
+            yield queues_1.prereqsQueue.add({
+                courseId: args.id,
+            });
+            return course;
+        }
+        catch (error) {
+            console.log(error);
+            throw new Error("Failed to create prereqs job.");
+        }
     }),
     // Generate prereqs mutation resolver
     generatePrereqs: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
@@ -449,6 +490,41 @@ exports.courseMutationResolvers = {
             },
         });
         return updatedCourse; // Return course
+    }),
+    // Create Job for generating units
+    createUnitsJob: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
+        // Grab prisma client
+        const { prisma } = contextValue;
+        // Grab prisma client error handling
+        if (!prisma) {
+            throw new Error("Failed to find prisma client.");
+        }
+        // Grab args
+        const { id: courseId } = args;
+        // Grab args error handling
+        if (!courseId) {
+            throw new Error("Missing required fields.");
+        }
+        // Grab course
+        const course = yield prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+        });
+        // Grab course error handling
+        if (!course) {
+            throw new Error("Failed to find course.");
+        }
+        try {
+            yield queues_1.unitsQueue.add({
+                courseId: args.id,
+            });
+            return course;
+        }
+        catch (error) {
+            console.log(error);
+            throw new Error("Failed to create units job.");
+        }
     }),
     // Generate prereqs mutation resolver
     generateUnits: (_parent, args, contextValue) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1249,6 +1325,7 @@ exports.courseMutationResolvers = {
         if (!lesson) {
             throw new Error("Failed to update lesson with content");
         }
+        console.log("lesson: ", lesson);
         return lesson;
     }),
     // Update Current Lesson Id

@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.prisma = void 0;
 const http_1 = require("http");
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
@@ -19,10 +20,10 @@ const fs_1 = require("fs");
 const resolvers_1 = require("./graph/resolvers");
 const express_jwt_1 = require("express-jwt");
 const client_1 = require("@prisma/client");
-const cors_1 = __importDefault(require("cors"));
 const typeDefs = (0, fs_1.readFileSync)("./src/graph/schema.graphql", {
     encoding: "utf-8",
 });
+exports.prisma = new client_1.PrismaClient();
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
     app.use((0, express_jwt_1.expressjwt)({
@@ -30,25 +31,15 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
         algorithms: ["HS256"],
         credentialsRequired: false,
     }));
-    app.use((0, cors_1.default)({
-        origin: ["https://rabbit-hole-pi.vercel.app", "http://localhost:3000"],
-    }));
-    app.use((_, res, next) => {
-        res.setHeader("Access-Control-Allow-Origin", "https://rabbit-hole-pi.vercel.app");
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        res.setHeader("Access-Control-Allow-Credentials", "true");
-        next();
-    });
     const httpServer = (0, http_1.createServer)(app);
-    const prisma = new client_1.PrismaClient();
     const apolloServer = new apollo_server_express_1.ApolloServer({
+        cache: "bounded",
         typeDefs,
         resolvers: resolvers_1.resolvers,
         context: ({ req, res }) => __awaiter(void 0, void 0, void 0, function* () {
             var _a;
             return ({
-                prisma,
+                prisma: exports.prisma,
                 userId: req.headers.userId,
                 expiry: req.headers.expiry,
                 token: (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split("Bearer ")[1], // token

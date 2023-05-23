@@ -10,6 +10,8 @@ const typeDefs = readFileSync("./src/graph/schema.graphql", {
   encoding: "utf-8",
 });
 
+export const prisma = new PrismaClient();
+
 const startServer = async () => {
   const app = express();
   app.use(
@@ -20,8 +22,6 @@ const startServer = async () => {
     })
   );
   const httpServer = createServer(app);
-
-  const prisma = new PrismaClient();
 
   const apolloServer = new ApolloServer({
     cache: "bounded",
