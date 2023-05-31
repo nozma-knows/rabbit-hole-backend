@@ -104,8 +104,16 @@ export type GenerateLessonInput = {
   topics: Scalars['String'];
 };
 
+export type LessonInput = {
+  content: Scalars['String'];
+  title: Scalars['String'];
+  topics?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
+  addPrereqs: Course;
+  addUnits: Course;
   createCourse: Course;
   createPrereqsJob: Course;
   createQuizAttempt: QuizAttempt;
@@ -123,6 +131,18 @@ export type Mutation = {
   updateQuizAttempt: QuizAttempt;
   updateQuizAttemptStatus: QuizAttempt;
   updateUserDetails: UserDetails;
+};
+
+
+export type MutationAddPrereqsArgs = {
+  id: Scalars['String'];
+  prereqs?: InputMaybe<Array<InputMaybe<PrereqInput>>>;
+};
+
+
+export type MutationAddUnitsArgs = {
+  id: Scalars['String'];
+  units?: InputMaybe<Array<InputMaybe<UnitInput>>>;
 };
 
 
@@ -214,6 +234,12 @@ export type MutationUpdateUserDetailsArgs = {
   userId: Scalars['String'];
 };
 
+export type PrereqInput = {
+  description: Scalars['String'];
+  title: Scalars['String'];
+  topics?: InputMaybe<Array<InputMaybe<TopicInput>>>;
+};
+
 export type PrereqTopic = {
   __typename?: 'PrereqTopic';
   createdAt: Scalars['String'];
@@ -261,6 +287,12 @@ export type QueryUserDetailsArgs = {
   userId: Scalars['String'];
 };
 
+export type QuestionInput = {
+  answer: Scalars['String'];
+  choices?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  question: Scalars['String'];
+};
+
 export type QuizAttempt = {
   __typename?: 'QuizAttempt';
   attempt: Scalars['Int'];
@@ -273,6 +305,10 @@ export type QuizAttempt = {
   responses: Array<Maybe<QuizResponse>>;
   status: Status;
   updatedAt: Scalars['String'];
+};
+
+export type QuizInput = {
+  questions?: InputMaybe<Array<InputMaybe<QuestionInput>>>;
 };
 
 export type QuizQuestion = {
@@ -305,6 +341,11 @@ export enum Status {
   Pending = 'PENDING'
 }
 
+export type TopicInput = {
+  description: Scalars['String'];
+  title: Scalars['String'];
+};
+
 export type UnitExercise = {
   __typename?: 'UnitExercise';
   createdAt: Scalars['String'];
@@ -313,6 +354,13 @@ export type UnitExercise = {
   unit: CourseUnit;
   unitId: Scalars['String'];
   updatedAt: Scalars['String'];
+};
+
+export type UnitInput = {
+  description: Scalars['String'];
+  lessons?: InputMaybe<Array<InputMaybe<LessonInput>>>;
+  quizzes?: InputMaybe<Array<InputMaybe<QuizInput>>>;
+  title: Scalars['String'];
 };
 
 export type UnitLesson = {
@@ -471,15 +519,21 @@ export type ResolversTypes = ResolversObject<{
   GenerateLessonInput: GenerateLessonInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  LessonInput: LessonInput;
   Mutation: ResolverTypeWrapper<{}>;
+  PrereqInput: PrereqInput;
   PrereqTopic: ResolverTypeWrapper<PrereqTopic>;
   Query: ResolverTypeWrapper<{}>;
+  QuestionInput: QuestionInput;
   QuizAttempt: ResolverTypeWrapper<QuizAttempt>;
+  QuizInput: QuizInput;
   QuizQuestion: ResolverTypeWrapper<QuizQuestion>;
   QuizResponse: ResolverTypeWrapper<QuizResponse>;
   Status: Status;
   String: ResolverTypeWrapper<Scalars['String']>;
+  TopicInput: TopicInput;
   UnitExercise: ResolverTypeWrapper<UnitExercise>;
+  UnitInput: UnitInput;
   UnitLesson: ResolverTypeWrapper<UnitLesson>;
   UnitQuiz: ResolverTypeWrapper<UnitQuiz>;
   UpdateCompletedLessonsInput: UpdateCompletedLessonsInput;
@@ -502,14 +556,20 @@ export type ResolversParentTypes = ResolversObject<{
   GenerateLessonInput: GenerateLessonInput;
   ID: Scalars['ID'];
   Int: Scalars['Int'];
+  LessonInput: LessonInput;
   Mutation: {};
+  PrereqInput: PrereqInput;
   PrereqTopic: PrereqTopic;
   Query: {};
+  QuestionInput: QuestionInput;
   QuizAttempt: QuizAttempt;
+  QuizInput: QuizInput;
   QuizQuestion: QuizQuestion;
   QuizResponse: QuizResponse;
   String: Scalars['String'];
+  TopicInput: TopicInput;
   UnitExercise: UnitExercise;
+  UnitInput: UnitInput;
   UnitLesson: UnitLesson;
   UnitQuiz: UnitQuiz;
   UpdateCompletedLessonsInput: UpdateCompletedLessonsInput;
@@ -586,6 +646,8 @@ export type CourseUnitResolvers<ContextType = Context, ParentType extends Resolv
 }>;
 
 export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  addPrereqs?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationAddPrereqsArgs, 'id'>>;
+  addUnits?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationAddUnitsArgs, 'id'>>;
   createCourse?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreateCourseArgs, 'input'>>;
   createPrereqsJob?: Resolver<ResolversTypes['Course'], ParentType, ContextType, RequireFields<MutationCreatePrereqsJobArgs, 'id'>>;
   createQuizAttempt?: Resolver<ResolversTypes['QuizAttempt'], ParentType, ContextType, Partial<MutationCreateQuizAttemptArgs>>;

@@ -212,6 +212,40 @@ input CreateQuizAttemptInput {
   response: String!
 }
 
+input TopicInput {
+  title: String!
+  description: String!
+}
+
+input PrereqInput {
+  title: String!
+  description: String!
+  topics: [TopicInput]
+}
+
+input LessonInput {
+  title: String!
+  topics: [String]
+  content: String!
+}
+
+input QuestionInput {
+  question: String!
+  choices: [String]
+  answer: String!
+}
+
+input QuizInput {
+  questions: [QuestionInput]
+}
+
+input UnitInput {
+  title: String!
+  description: String!
+  lessons: [LessonInput]
+  quizzes: [QuizInput]
+}
+
 type Query {
   course(id: String!): Course
   courses(authorId: String!): [Course]!
@@ -226,8 +260,10 @@ type Mutation {
   deleteCourse(id: String!): Course!
   createPrereqsJob(id: String!): Course!
   generatePrereqs(id: String!): Course!
+  addPrereqs(id: String!, prereqs: [PrereqInput]): Course!
   createUnitsJob(id: String!): Course!
   generateUnits(id: String!): Course!
+  addUnits(id: String!, units: [UnitInput]): Course!
   generateExercises(id: String!): [UnitExercise]!
   generateQuiz(id: String!): UnitQuiz!
   generateLesson(input: GenerateLessonInput!): UnitLesson!
